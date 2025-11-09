@@ -1,6 +1,6 @@
 # Star Crawler
 
-Create and share cinematic opening crawl animations. Transform your text into a scrolling space epic with customizable episode numbers, subtitles, and crawl text.
+A free, open-source web app for creating and sharing cinematic opening crawl animations. Transform your text into a scrolling space epic with customizable episode numbers, subtitles, and crawl text.
 
 ## Quick Start
 
@@ -35,6 +35,9 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 
 ```
 ├── app/                    # Next.js app directory
+│   ├── disclaimer/        # Disclaimer page
+│   ├── privacy/           # Privacy policy page
+│   ├── terms/             # Terms of service page
 │   ├── icon.svg           # Favicon
 │   ├── globals.css        # Global styles & font definitions
 │   ├── layout.tsx         # Root layout
@@ -48,6 +51,7 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 │   │   ├── fade-mask.tsx          # Fade effects
 │   │   ├── share-modal.tsx        # Sharing UI
 │   │   └── slider.tsx             # Custom slider
+│   ├── legal/             # Legal page components
 │   └── ui/                # Reusable UI components
 └── lib/                   # Utilities, types, constants, validation
     ├── constants.ts       # Animation & UI constants
@@ -68,3 +72,8 @@ Animation timing, colors, and fonts are centralized in `lib/constants.ts` and `a
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+## Links
+
+- **Live Site**: [starcrawler.vercel.app](https://starcrawler.vercel.app)
+- **GitHub**: [github.com/mochixlb/starcrawler](https://github.com/mochixlb/starcrawler)

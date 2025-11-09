@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
       <h2>We Don't Collect Your Data</h2>
       <p>
-        <strong>Star Crawler doesn't collect, store, or share your personal information.</strong> This is a personal project, and everything you create stays in your browser.
+        <strong>Star Crawler doesn't collect, store, or share your personal information.</strong> This is a free, open-source personal project licensed under the MIT License, and everything you create stays in your browser.
       </p>
 
       <h2>What We Don't Do</h2>

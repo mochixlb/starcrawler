@@ -16,7 +16,7 @@ export default function TermsPage() {
 
       <h2>What Star Crawler Is</h2>
       <p>
-        Star Crawler is a free personal project that lets you create and share opening crawl animations. It's provided "as is"—we don't make any promises about it working perfectly all the time.
+        Star Crawler is a free, open-source personal project licensed under the MIT License that lets you create and share opening crawl animations. It's provided "as is"—we don't make any promises about it working perfectly all the time.
       </p>
 
       <h2>Using Star Crawler</h2>
