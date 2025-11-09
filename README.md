@@ -11,6 +11,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to start creating.
 
+## Development
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run lint     # Run ESLint
+npm test         # Run tests in watch mode
+npm run test:run # Run tests once
+npm run test:ui  # Run tests with UI
+```
+
 ## Features
 
 - **Three-phase animation**: Opening text → logo → scrolling crawl with animated starfield background
@@ -29,6 +40,7 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 - **Framer Motion** (animations)
 - **Zod** (validation)
 - **Lucide React** (icons)
+- **Vitest** (testing)
 
 ## Project Structure
 
@@ -52,11 +64,14 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 │   │   └── slider.tsx             # Custom slider
 │   ├── legal/             # Legal page components
 │   └── ui/                # Reusable UI components
+│       └── __tests__/     # Component tests
 └── lib/                   # Utilities, types, constants, validation
+    ├── __tests__/         # Unit tests
     ├── constants.ts       # Animation & UI constants
     ├── types.ts          # TypeScript types
     ├── utils.ts          # Helper functions
-    └── validation.ts     # Form validation
+    ├── validation.ts     # Form validation
+    └── test-utils.tsx     # Testing utilities
 ```
 
 ## How It Works
@@ -67,6 +82,15 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 4. Share via URL or social media
 
 Animation timing, colors, and fonts are centralized in `lib/constants.ts` and `app/globals.css` for easy customization.
+
+## Testing
+
+The project includes a comprehensive test suite with 112 tests covering:
+- Validation logic (Zod schemas)
+- Utility functions (encoding, formatting, URL handling)
+- UI components (Button, FormInput)
+
+Run tests with `npm test` or `npm run test:run`. All tests use Vitest with React Testing Library.
 
 ## License
 
