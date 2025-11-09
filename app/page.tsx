@@ -219,8 +219,8 @@ function HomeContent() {
 
   return (
     <main className="relative min-h-screen bg-crawl-black">
-      {/* Starfield background - only show during logo and crawl phases */}
-      {crawlPhase !== "opening-text" && <Starfield />}
+      {/* Starfield background - show on main page and during logo/crawl phases, hide during opening text */}
+      {(!isPlaying || crawlPhase !== "opening-text") && <Starfield />}
 
       {/* Main content */}
       <div className="relative z-20 flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
