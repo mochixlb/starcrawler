@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FormInput } from "@/components/ui/form-input";
-import { FORM_CONSTANTS, URL_CONSTANTS } from "@/lib/constants";
+import { FORM_CONSTANTS } from "@/lib/constants";
 import { validateCrawlData } from "@/lib/validation";
-import { encodeCrawlData, isUrlLengthSafe, getBaseUrl } from "@/lib/utils";
 import type { CrawlInputProps } from "@/lib/types";
 
 const DEFAULT_OPENING_TEXT = "A long time ago in a galaxy far, far away....";
@@ -37,7 +36,6 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
     initialData?.crawlText || DEFAULT_CRAWL_TEXT
   );
   const [error, setError] = useState<string | null>(null);
-  const [urlWarning, setUrlWarning] = useState<string | null>(null);
 
   // Calculate character counts for all fields
   const crawlTextLength = crawlText.length;
@@ -66,62 +64,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
     isEpisodeNumberOverLimit ||
     isEpisodeSubtitleOverLimit;
 
-  // Prepare crawl data for URL length check (only when form is valid)
-  const crawlDataForUrlCheck = useMemo(() => {
-    if (hasFieldOverLimit || isCrawlUnderLimit || !crawlText.trim()) {
-      return null;
-    }
-    return { openingText, logoText, episodeNumber, episodeSubtitle, crawlText };
-  }, [
-    openingText,
-    logoText,
-    episodeNumber,
-    episodeSubtitle,
-    crawlText,
-    hasFieldOverLimit,
-    isCrawlUnderLimit,
-  ]);
-
-  // Check URL length with debouncing (only when form is valid)
-  useEffect(() => {
-    if (!crawlDataForUrlCheck) {
-      setUrlWarning(null);
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      const validation = validateCrawlData(crawlDataForUrlCheck);
-      if (!validation.success) {
-        setUrlWarning(null);
-        return;
-      }
-
-      try {
-        const encoded = encodeCrawlData(validation.data);
-        const baseUrl = getBaseUrl();
-        const fullUrl = `${baseUrl}?crawl=${encoded}`;
-        const urlLength = fullUrl.length;
-
-        if (urlLength > URL_CONSTANTS.MAX_URL_LENGTH) {
-          const overage = urlLength - URL_CONSTANTS.MAX_URL_LENGTH;
-          setUrlWarning(
-            `URL would be ${overage} characters too long. Reduce content to enable sharing.`
-          );
-        } else if (urlLength > URL_CONSTANTS.MAX_URL_LENGTH * 0.9) {
-          const remaining = URL_CONSTANTS.MAX_URL_LENGTH - urlLength;
-          setUrlWarning(
-            `URL is getting long (${remaining} characters remaining). Consider reducing content.`
-          );
-        } else {
-          setUrlWarning(null);
-        }
-      } catch {
-        setUrlWarning(null);
-      }
-    }, 500); // Debounce: check after 500ms of no changes
-
-    return () => clearTimeout(timeoutId);
-  }, [crawlDataForUrlCheck]);
+  // URL-length checks removed; field-level limits keep content shareable
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -139,27 +82,6 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
 
     if (!validation.success) {
       setError(validation.error);
-      return;
-    }
-
-    // Check URL length before encoding
-    try {
-      const encoded = encodeCrawlData(validation.data);
-      const baseUrl = getBaseUrl();
-
-      if (!isUrlLengthSafe(baseUrl, encoded)) {
-        const fullUrl = `${baseUrl}?crawl=${encoded}`;
-        const overage = fullUrl.length - URL_CONSTANTS.MAX_URL_LENGTH;
-        setError(
-          `The crawl content is too long to share via URL (${overage} characters over limit). Please reduce the text length.`
-        );
-        setUrlWarning(null); // Clear warning, show error instead
-        return;
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to prepare crawl data"
-      );
       return;
     }
 
@@ -200,21 +122,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
       )}
 
       {/* URL length warning (non-blocking) */}
-      {urlWarning && !error && (
-        <div
-          className="rounded-md border-2 border-crawl-yellow/40 bg-crawl-yellow/10 px-4 py-3 backdrop-blur-sm"
-          role="alert"
-          aria-live="polite"
-          style={{
-            clipPath:
-              "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
-          }}
-        >
-          <p className="font-opening-text text-sm font-medium text-crawl-yellow">
-            ⚠️ {urlWarning}
-          </p>
-        </div>
-      )}
+      {/* URL length warnings removed for simplicity */}
 
       {/* Opening Text Input */}
       <div className="space-y-1.5">
@@ -307,6 +215,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
           value={crawlText}
           onChange={handleCrawlTextChange}
           placeholder={DEFAULT_CRAWL_TEXT}
+          maxLength={FORM_CONSTANTS.MAX_MESSAGE_LENGTH}
           className={`min-h-[180px] sm:min-h-[200px] transition-colors ${
             isCrawlOverLimit || isCrawlUnderLimit
               ? "border-red-500/50 focus-visible:border-red-500 focus-visible:ring-red-500/50"
