@@ -72,3 +72,46 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
+/**
+ * Formats seconds into MM:SS format
+ */
+export function formatTime(seconds: number): string {
+  const mins = Math.floor(Math.abs(seconds) / 60);
+  const secs = Math.floor(Math.abs(seconds) % 60);
+  const sign = seconds < 0 ? "-" : "";
+  return `${sign}${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Builds full crawl text from crawl data
+ */
+export function buildCrawlText(crawlData: CrawlData): string {
+  const textParts: string[] = [];
+
+  if (crawlData.openingText) {
+    textParts.push(crawlData.openingText);
+  }
+
+  if (crawlData.logoText) {
+    textParts.push(`\n${crawlData.logoText}\n`);
+  }
+
+  if (crawlData.episodeNumber || crawlData.episodeSubtitle) {
+    const episodeParts: string[] = [];
+    if (crawlData.episodeNumber) {
+      episodeParts.push(`EPISODE ${crawlData.episodeNumber}`);
+    }
+    if (crawlData.episodeSubtitle) {
+      episodeParts.push(crawlData.episodeSubtitle);
+    }
+    if (episodeParts.length > 0) {
+      textParts.push(`\n${episodeParts.join("\n")}\n`);
+    }
+  }
+
+  if (crawlData.crawlText) {
+    textParts.push(crawlData.crawlText);
+  }
+
+  return textParts.join("\n\n");
+}

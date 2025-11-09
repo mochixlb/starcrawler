@@ -30,3 +30,8 @@ export const FORM_CONSTANTS = {
   MIN_MESSAGE_LENGTH: 10,
   MAX_MESSAGE_LENGTH: 2000,
 } as const;
+
+// UI constants
+export const UI_CONSTANTS = {
+  COPY_FEEDBACK_DURATION: 2000, // milliseconds
+} as const;

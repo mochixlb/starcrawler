@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { STARFIELD_CONSTANTS } from "@/lib/constants";
 
@@ -63,41 +64,44 @@ function StarLayer({ stars, duration, opacity }: StarLayerProps) {
 
 export function Starfield() {
   // Generate stars for each layer with different sizes and counts
-  // More stars to fill the entire screen
-  const layers = [
-    {
-      stars: generateStars(
-        STARFIELD_CONSTANTS.STAR_COUNTS[0]!,
-        STARFIELD_CONSTANTS.STAR_SIZES[0]!
-      ), // Small stars - many of them
-      duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[0]!,
-      opacity: 0.9,
-    },
-    {
-      stars: generateStars(
-        STARFIELD_CONSTANTS.STAR_COUNTS[1]!,
-        STARFIELD_CONSTANTS.STAR_SIZES[1]!
-      ), // Medium stars
-      duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[1]!,
-      opacity: 0.7,
-    },
-    {
-      stars: generateStars(
-        STARFIELD_CONSTANTS.STAR_COUNTS[2]!,
-        STARFIELD_CONSTANTS.STAR_SIZES[2]!
-      ), // Large stars
-      duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[2]!,
-      opacity: 0.5,
-    },
-    {
-      stars: generateStars(
-        STARFIELD_CONSTANTS.STAR_COUNTS[3]!,
-        STARFIELD_CONSTANTS.STAR_SIZES[2]! + 1
-      ), // Extra large stars
-      duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[3]!,
-      opacity: 0.4,
-    },
-  ];
+  // Memoize to prevent regeneration on every render
+  const layers = useMemo(
+    () => [
+      {
+        stars: generateStars(
+          STARFIELD_CONSTANTS.STAR_COUNTS[0]!,
+          STARFIELD_CONSTANTS.STAR_SIZES[0]!
+        ), // Small stars - many of them
+        duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[0]!,
+        opacity: 0.9,
+      },
+      {
+        stars: generateStars(
+          STARFIELD_CONSTANTS.STAR_COUNTS[1]!,
+          STARFIELD_CONSTANTS.STAR_SIZES[1]!
+        ), // Medium stars
+        duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[1]!,
+        opacity: 0.7,
+      },
+      {
+        stars: generateStars(
+          STARFIELD_CONSTANTS.STAR_COUNTS[2]!,
+          STARFIELD_CONSTANTS.STAR_SIZES[2]!
+        ), // Large stars
+        duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[2]!,
+        opacity: 0.5,
+      },
+      {
+        stars: generateStars(
+          STARFIELD_CONSTANTS.STAR_COUNTS[3]!,
+          STARFIELD_CONSTANTS.STAR_SIZES[2]! + 1
+        ), // Extra large stars
+        duration: STARFIELD_CONSTANTS.ANIMATION_SPEEDS[3]!,
+        opacity: 0.4,
+      },
+    ],
+    []
+  );
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-crawl-black">
