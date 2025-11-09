@@ -106,5 +106,28 @@
     color: hsl(var(--foreground));
     background: var(--crawl-black);
   }
+
+  /* Mobile touch optimizations */
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Slider touch handling - give full control to JavaScript for dragging */
+  [role="slider"] {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure minimum touch target size (44x44px) */
+  button:not(.icon-button),
+  [role="button"]:not(.icon-button) {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 

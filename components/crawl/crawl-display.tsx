@@ -326,8 +326,8 @@ export function CrawlDisplay({
     if (seekTo !== undefined && seekTo >= 0 && seekTo <= 1 && isPlaying) {
       const seekTime = seekTo * totalDuration;
       
-      // If seeking to the very start (progress = 0), restart from beginning
-      if (seekTo === 0 || seekTime < 0.1) {
+      // If seeking to the very start (progress = 0 or very close), restart from beginning
+      if (seekTo <= 0.001 || seekTime < 0.1) {
         // Restart from opening text phase
         setPhase("opening-text");
         setIsComplete(false);
@@ -524,8 +524,8 @@ export function CrawlDisplay({
     return null;
   }
 
-  const handleClick = (e: React.MouseEvent) => {
-    // Don't toggle if clicking on controls or other interactive elements
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    // Don't toggle if interacting with controls or other interactive elements
     const target = e.target as HTMLElement;
     if (
       target.closest('[role="button"]') ||
@@ -535,6 +535,11 @@ export function CrawlDisplay({
       target.closest('[role="slider"]')
     ) {
       return;
+    }
+    
+    // Prevent default for touch events to avoid double-firing
+    if (e.type === 'touchstart') {
+      e.preventDefault();
     }
     
     // Toggle pause/play
@@ -555,10 +560,12 @@ export function CrawlDisplay({
   return (
     <div
       className="fixed inset-0 z-10 overflow-hidden cursor-pointer"
-      onClick={handleClick}
+      onClick={handleInteraction}
+      onTouchStart={handleInteraction}
       style={{
         perspective: CRAWL_CONSTANTS.PERSPECTIVE,
         perspectiveOrigin: "50% 50%",
+        touchAction: "manipulation",
       }}
       aria-live="polite"
       aria-label="Opening crawl animation"
@@ -567,9 +574,10 @@ export function CrawlDisplay({
       {onClose && (
         <Button
           onClick={handleClose}
-          className={`fixed top-4 left-4 sm:left-auto sm:right-4 z-50 h-12 w-12 border-2 border-crawl-yellow/50 bg-black/90 p-0 text-crawl-yellow/90 backdrop-blur-md transition-all duration-300 hover:border-crawl-yellow hover:bg-crawl-yellow/15 hover:text-crawl-yellow focus-visible:ring-2 focus-visible:ring-crawl-yellow shadow-lg shadow-black/50 ${
+          className={`fixed top-4 left-4 sm:left-auto sm:right-4 z-50 h-12 w-12 min-h-[44px] min-w-[44px] border-2 border-crawl-yellow/50 bg-black/90 p-0 text-crawl-yellow/90 backdrop-blur-md transition-all duration-300 hover:border-crawl-yellow hover:bg-crawl-yellow/15 hover:text-crawl-yellow active:scale-95 focus-visible:ring-2 focus-visible:ring-crawl-yellow shadow-lg shadow-black/50 touch-manipulation ${
             controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
+          style={{ touchAction: "manipulation" }}
           aria-label="Close crawl and return to form"
           title="Close (Esc)"
         >
@@ -651,7 +659,7 @@ export function CrawlDisplay({
           }}
         >
           <motion.div
-            className="w-full max-w-4xl px-8 text-center"
+            className="w-full max-w-4xl px-4 sm:px-6 md:px-8 text-center"
             animate={{
               ...controls,
               opacity: crawlOpacity,

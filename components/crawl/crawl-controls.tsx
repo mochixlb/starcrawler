@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import * as Slider from "@radix-ui/react-slider";
+import { Slider } from "./slider";
 import {
   Play,
   Pause,
@@ -135,7 +135,6 @@ export function CrawlControls({
   const [internalVisible, setInternalVisible] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isDraggingRef = useRef(false);
   const pendingSeekRef = useRef<number | null>(null);
 
   // Use external visibility if provided, otherwise use internal state
@@ -143,9 +142,9 @@ export function CrawlControls({
     externalVisible !== undefined ? externalVisible : internalVisible;
   const setIsVisible = onControlsVisibilityChange || setInternalVisible;
 
-  // Auto-hide controls on mouse movement (YouTube-like)
+  // Auto-hide controls on mouse movement or touch (YouTube-like)
   useEffect(() => {
-    const handleMouseMove = () => {
+    const handleInteraction = () => {
       setIsVisible(true);
 
       // Clear existing timeout
@@ -164,10 +163,15 @@ export function CrawlControls({
       setIsVisible(false);
     }, 3000);
 
-    window.addEventListener("mousemove", handleMouseMove);
+    // Listen to both mouse and touch events
+    window.addEventListener("mousemove", handleInteraction, { passive: true });
+    window.addEventListener("touchstart", handleInteraction, { passive: true });
+    window.addEventListener("touchmove", handleInteraction, { passive: true });
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousemove", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("touchmove", handleInteraction);
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
@@ -187,49 +191,24 @@ export function CrawlControls({
     }
   };
 
-  const handleSliderChange = (values: number[]) => {
-    const newProgress = values[0] ?? 0;
-    pendingSeekRef.current = newProgress;
-
-    if (!isDraggingRef.current) {
-      onSeek(newProgress);
-      pendingSeekRef.current = null;
+  // Handle slider value changes (during drag)
+  const handleSliderChange = (newProgress: number) => {
+    // Show controls when user interacts with slider
+    setIsVisible(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
     }
+
+    // Update progress during drag (visual feedback)
+    // The actual seek will happen on commit
+    pendingSeekRef.current = newProgress;
   };
 
-  const handleSliderValueCommit = (values: number[]) => {
-    const finalProgress = values[0] ?? 0;
+  // Handle slider commit (when drag ends or track is clicked)
+  const handleSliderCommit = (finalProgress: number) => {
+    // Seek to the final position
     onSeek(finalProgress);
     pendingSeekRef.current = null;
-    isDraggingRef.current = false;
-  };
-
-  const handleSliderMouseDown = () => {
-    isDraggingRef.current = true;
-  };
-
-  const handleSliderMouseUp = () => {
-    if (isDraggingRef.current) {
-      if (pendingSeekRef.current !== null) {
-        onSeek(pendingSeekRef.current);
-        pendingSeekRef.current = null;
-      }
-    }
-    isDraggingRef.current = false;
-  };
-
-  const handleSliderTouchStart = () => {
-    isDraggingRef.current = true;
-  };
-
-  const handleSliderTouchEnd = () => {
-    if (isDraggingRef.current) {
-      if (pendingSeekRef.current !== null) {
-        onSeek(pendingSeekRef.current);
-        pendingSeekRef.current = null;
-      }
-    }
-    isDraggingRef.current = false;
   };
 
   const totalTime = elapsed + remaining;
@@ -246,15 +225,16 @@ export function CrawlControls({
 
   return (
     <>
-      {/* Centered Play Button (Mobile Only) */}
+      {/* Centered Play Button */}
       <div
-        className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-300 pointer-events-none sm:hidden ${
+        className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
       >
         <button
           onClick={isPaused ? onResume : onPause}
-          className="pointer-events-auto flex h-24 w-24 items-center justify-center bg-transparent p-0 text-crawl-yellow transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-black touch-manipulation cursor-pointer"
+          className="pointer-events-auto flex h-24 w-24 items-center justify-center bg-transparent p-0 text-crawl-yellow transition-all hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-black touch-manipulation cursor-pointer"
+          style={{ touchAction: "manipulation" }}
           aria-label={isPaused ? "Resume crawl" : "Pause crawl"}
           title={isPaused ? "Resume" : "Pause"}
         >
@@ -285,10 +265,13 @@ export function CrawlControls({
             setIsVisible(false);
           }, 1000);
         }}
-        onTouchStart={() => {
-          setIsVisible(true);
-          if (hideTimeoutRef.current) {
-            clearTimeout(hideTimeoutRef.current);
+        onTouchStart={(e) => {
+          // Don't show controls if touching the slider (handled separately)
+          if (!(e.target as HTMLElement).closest('[role="slider"]')) {
+            setIsVisible(true);
+            if (hideTimeoutRef.current) {
+              clearTimeout(hideTimeoutRef.current);
+            }
           }
         }}
         style={{
@@ -297,46 +280,22 @@ export function CrawlControls({
       >
         <div className="w-full bg-gradient-to-t from-black/90 via-black/80 to-transparent pb-4 pt-8">
           {/* Progress Bar */}
-          <div className="mb-3 px-4">
-            <Slider.Root
-              className="relative flex h-5 w-full touch-none select-none items-center cursor-pointer"
-              value={[progress]}
-              onValueChange={handleSliderChange}
-              onValueCommit={handleSliderValueCommit}
-              onMouseDown={handleSliderMouseDown}
-              onMouseUp={handleSliderMouseUp}
-              onMouseLeave={handleSliderMouseUp}
-              onTouchStart={handleSliderTouchStart}
-              onTouchEnd={handleSliderTouchEnd}
+          <div
+            className="mb-3 px-4"
+            style={{ minHeight: "44px", display: "flex", alignItems: "center" }}
+          >
+            <Slider
+              value={progress}
+              onChange={handleSliderChange}
+              onCommit={handleSliderCommit}
               min={0}
               max={1}
               step={0.001}
-              aria-label="Crawl progress"
-            >
-              <Slider.Track
-                className="relative h-2 w-full grow bg-crawl-yellow/20 cursor-pointer"
-                style={{
-                  clipPath:
-                    "polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))",
-                }}
-              >
-                <Slider.Range
-                  className="absolute h-full bg-crawl-yellow"
-                  style={{
-                    clipPath:
-                      "polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))",
-                  }}
-                />
-              </Slider.Track>
-              <Slider.Thumb
-                className="block h-5 w-5 border-2 border-crawl-yellow bg-crawl-yellow shadow-md transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black touch-manipulation cursor-pointer"
-                style={{
-                  clipPath:
-                    "polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))",
-                }}
-                aria-label="Crawl progress slider"
-              />
-            </Slider.Root>
+              ariaLabel="Crawl progress"
+              trackClassName=""
+              rangeClassName="bg-crawl-yellow"
+              thumbClassName="border-crawl-yellow bg-crawl-yellow"
+            />
           </div>
 
           {/* Controls Row */}

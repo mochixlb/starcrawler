@@ -3,12 +3,12 @@ export const CRAWL_CONSTANTS = {
   PERSPECTIVE: "400px",
   ROTATION: 25, // degrees
   DURATION: 45, // seconds
-  FONT_SIZE_BASE: "2.5rem", // 40px
-  FONT_SIZE_TITLE: "3.5rem", // 56px
-  FONT_SIZE_EPISODE: "2rem", // 32px
+  FONT_SIZE_BASE: "clamp(1rem, 4vw, 2.5rem)", // Responsive: 16px on mobile, scales up to 40px
+  FONT_SIZE_TITLE: "clamp(1.5rem, 5vw, 3.5rem)", // Responsive: 24px on mobile, scales up to 56px
+  FONT_SIZE_EPISODE: "clamp(0.875rem, 3vw, 2rem)", // Responsive: 14px on mobile, scales up to 32px
   LINE_HEIGHT: 1.7,
   LETTER_SPACING: "0.05em",
-  PARAGRAPH_SPACING: "3rem",
+  PARAGRAPH_SPACING: "clamp(1.5rem, 4vw, 3rem)", // Responsive spacing for mobile
   OPENING_TEXT_COLOR: "#4BD5EE", // Cyan blue for "A long time ago..."
   LOGO_ANIMATION_DURATION: 8, // seconds for logo shrink/recede (matches original timing)
   OPENING_TEXT_DURATION: 6, // seconds to display opening text (matches original timing)
