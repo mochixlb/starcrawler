@@ -110,7 +110,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
       <div className="space-y-1">
         <label
           htmlFor="crawl-text"
-          className="text-xs font-medium text-starwars-yellow sm:text-sm"
+          className="text-xs font-medium text-crawl-yellow sm:text-sm"
         >
           Crawl Text
         </label>
@@ -119,7 +119,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
           value={crawlText}
           onChange={handleCrawlTextChange}
           placeholder="It is a period of civil war..."
-          className="min-h-[120px] border-starwars-yellow/30 bg-black text-sm text-white placeholder:text-gray-400 focus:border-starwars-yellow focus:ring-starwars-yellow sm:min-h-[140px]"
+          className="min-h-[120px] border-crawl-yellow/30 bg-black text-sm text-white placeholder:text-gray-400 focus:border-crawl-yellow focus:ring-crawl-yellow sm:min-h-[140px]"
           aria-describedby="crawl-help crawl-error"
         />
         <div className="flex items-center justify-between">
@@ -151,7 +151,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
 
       <Button
         type="submit"
-        className="mt-2 w-full bg-starwars-yellow py-2 text-sm font-bold text-black hover:bg-starwars-yellow/90 sm:py-2.5 sm:text-base"
+        className="mt-2 w-full bg-crawl-yellow py-2 text-sm font-bold text-black hover:bg-crawl-yellow/90 sm:py-2.5 sm:text-base"
         disabled={isCrawlOverLimit || !crawlText.trim()}
       >
         Play Crawl

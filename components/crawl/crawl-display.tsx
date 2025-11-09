@@ -170,7 +170,7 @@ export function CrawlDisplay({
           }}
         >
           <div
-            className="font-logo text-starwars-yellow"
+            className="font-logo text-crawl-yellow"
             style={{
               fontSize: "clamp(4rem, 15vw, 12rem)",
               lineHeight: 1,
@@ -205,7 +205,7 @@ export function CrawlDisplay({
             }}
           >
             <div
-              className="space-y-6 font-starwars text-starwars-yellow"
+              className="space-y-6 font-crawl text-crawl-yellow"
               style={{
                 fontSize: CRAWL_CONSTANTS.FONT_SIZE_BASE,
                 lineHeight: CRAWL_CONSTANTS.LINE_HEIGHT,

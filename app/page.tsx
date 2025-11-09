@@ -28,7 +28,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen bg-starwars-black">
+    <main className="relative min-h-screen bg-crawl-black">
       {/* Starfield background */}
       <Starfield />
 
@@ -37,7 +37,7 @@ export default function Home() {
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1 className="mb-2 font-starwars text-3xl font-bold text-starwars-yellow sm:text-4xl md:text-5xl">
+              <h1 className="mb-2 font-crawl text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
                 STAR CRAWLER
               </h1>
               <p className="text-sm text-gray-200 sm:text-base">
@@ -54,7 +54,7 @@ export default function Home() {
               <div className="mt-2 text-center">
                 <button
                   onClick={handleReset}
-                  className="rounded-md border border-starwars-yellow/50 px-4 py-1.5 text-sm font-medium text-starwars-yellow hover:border-starwars-yellow"
+                  className="rounded-md border border-crawl-yellow/50 px-4 py-1.5 text-sm font-medium text-crawl-yellow hover:border-crawl-yellow"
                 >
                   Reset
                 </button>
@@ -74,7 +74,7 @@ export default function Home() {
           <div className="fixed bottom-8 left-1/2 z-30 -translate-x-1/2">
             <button
               onClick={handleComplete}
-              className="rounded-md border border-starwars-yellow/50 bg-black/80 px-6 py-2 font-medium text-starwars-yellow backdrop-blur-sm hover:border-starwars-yellow"
+              className="rounded-md border border-crawl-yellow/50 bg-black/80 px-6 py-2 font-medium text-crawl-yellow backdrop-blur-sm hover:border-crawl-yellow"
               aria-label="Stop crawl animation"
             >
               Stop

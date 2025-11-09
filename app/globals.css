@@ -1,6 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(0 0% 3.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(0 0% 3.9%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(0 0% 3.9%);
+  --color-primary: hsl(0 0% 9%);
+  --color-primary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(0 0% 96.1%);
+  --color-secondary-foreground: hsl(0 0% 9%);
+  --color-muted: hsl(0 0% 96.1%);
+  --color-muted-foreground: hsl(0 0% 45.1%);
+  --color-accent: hsl(0 0% 96.1%);
+  --color-accent-foreground: hsl(0 0% 9%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 89.8%);
+  --color-input: hsl(0 0% 89.8%);
+  --color-ring: hsl(0 0% 3.9%);
+  --radius: 0.5rem;
+  --color-chart-1: hsl(12 76% 61%);
+  --color-chart-2: hsl(173 58% 39%);
+  --color-chart-3: hsl(197 37% 24%);
+  --color-chart-4: hsl(43 74% 66%);
+  --color-chart-5: hsl(27 87% 67%);
+  --color-crawl-yellow: #ffe81f;
+  --color-crawl-black: #000000;
+  --color-crawl-blue: #4A90E2;
+  --color-crawl-cyan: #4BD5EE;
+  --crawl-perspective: 400px;
+  --crawl-rotation: 25deg;
+  --crawl-duration: 45s;
+}
 
 @layer base {
   :root {
@@ -30,8 +63,8 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --starwars-yellow: #ffe81f;
-    --starwars-black: #000000;
+    --crawl-yellow: #ffe81f;
+    --crawl-black: #000000;
     --crawl-perspective: 400px;
     --crawl-rotation: 25deg;
     --crawl-duration: 45s;
@@ -63,15 +96,15 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
+  
   body {
-    @apply bg-background text-foreground;
-    background: var(--starwars-black);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    background: var(--crawl-black);
   }
 }
 

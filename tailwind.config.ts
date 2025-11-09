@@ -50,10 +50,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "starwars-yellow": "#FFE81F",
-        "starwars-black": "#000000",
-        "starwars-blue": "#4A90E2",
-        "starwars-cyan": "#4BD5EE", // Opening text blue
+        "crawl-yellow": "#FFE81F",
+        "crawl-black": "#000000",
+        "crawl-blue": "#4A90E2",
+        "crawl-cyan": "#4BD5EE", // Opening text blue
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -61,7 +61,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        starwars: [
+        crawl: [
           '"Franklin Gothic Heavy"',
           '"Franklin Gothic Demi"',
           '"Arial Black"',

@@ -12,12 +12,12 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
     const labelColorClass =
       labelColor === "cyan"
-        ? "text-starwars-cyan"
-        : "text-starwars-yellow";
+        ? "text-crawl-cyan"
+        : "text-crawl-yellow";
     const borderColorClass =
       labelColor === "cyan"
-        ? "border-starwars-cyan/30 focus:border-starwars-cyan focus:ring-starwars-cyan/50"
-        : "border-starwars-yellow/30 focus:border-starwars-yellow focus:ring-starwars-yellow/50";
+        ? "border-crawl-cyan/30 focus:border-crawl-cyan focus:ring-crawl-cyan/50"
+        : "border-crawl-yellow/30 focus:border-crawl-yellow focus:ring-crawl-yellow/50";
 
     return (
       <div className="space-y-1">
