@@ -49,8 +49,6 @@ export default defineConfig({
         branches: 80,
         statements: 90,
       },
-      // Show only covered files in reports (cleaner output)
-      all: false,
       // Clean coverage reports before running
       clean: true,
       // Clean coverage on watch mode
