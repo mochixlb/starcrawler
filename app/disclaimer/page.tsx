@@ -2,9 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalLayout } from "@/components/legal/legal-layout";
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
+
 export const metadata: Metadata = {
   title: "Disclaimer - Star Crawler",
   description: "Trademark and copyright disclaimer for Star Crawler",
+  openGraph: {
+    title: "Disclaimer - Star Crawler",
+    description: "Trademark and copyright disclaimer for Star Crawler",
+    url: `${baseUrl}/disclaimer`,
+  },
+  twitter: {
+    card: "summary",
+    title: "Disclaimer - Star Crawler",
+    description: "Trademark and copyright disclaimer for Star Crawler",
+  },
 };
 
 export default function DisclaimerPage() {

@@ -2,9 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalLayout } from "@/components/legal/legal-layout";
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
+
 export const metadata: Metadata = {
   title: "Privacy Policy - Star Crawler",
   description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+  openGraph: {
+    title: "Privacy Policy - Star Crawler",
+    description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+    url: `${baseUrl}/privacy`,
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy - Star Crawler",
+    description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+  },
 };
 
 export default function PrivacyPage() {

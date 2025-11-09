@@ -2,9 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalLayout } from "@/components/legal/legal-layout";
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
+
 export const metadata: Metadata = {
   title: "Terms of Service - Star Crawler",
   description: "Terms of Service for Star Crawler - Read our terms and conditions",
+  openGraph: {
+    title: "Terms of Service - Star Crawler",
+    description: "Terms of Service for Star Crawler - Read our terms and conditions",
+    url: `${baseUrl}/terms`,
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Service - Star Crawler",
+    description: "Terms of Service for Star Crawler - Read our terms and conditions",
+  },
 };
 
 export default function TermsPage() {
