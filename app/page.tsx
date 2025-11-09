@@ -224,7 +224,7 @@ function HomeContent() {
       {(!isPlaying || crawlPhase !== "opening-text") && <Starfield />}
 
       {/* Main content */}
-      <div className="relative z-20 flex flex-1 flex-col items-center justify-center p-4 sm:p-6">
+      <div className="relative z-20 flex h-screen flex-col items-center justify-center p-4 sm:h-auto sm:flex-1 sm:p-6">
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">

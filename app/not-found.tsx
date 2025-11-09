@@ -37,7 +37,9 @@ export default function NotFound() {
               className="font-opening-text text-sm text-gray-300 sm:text-base leading-relaxed"
               style={{ letterSpacing: "0.05em" }}
             >
-              The coordinates you&apos;ve entered don&apos;t match any known location in this system. The page may have been moved to a different sector, or perhaps it never existed at all.
+              The coordinates you&apos;ve entered don&apos;t match any known
+              location in this system. The page may have been moved to a
+              different sector, or perhaps it never existed at all.
             </p>
           </div>
 
@@ -70,4 +72,3 @@ export default function NotFound() {
     </main>
   );
 }
-
