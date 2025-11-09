@@ -86,6 +86,7 @@ Animation timing, colors, and fonts are centralized in `lib/constants.ts` and `a
 ## Testing
 
 The project includes a comprehensive test suite with 112 tests covering:
+
 - Validation logic (Zod schemas)
 - Utility functions (encoding, formatting, URL handling)
 - UI components (Button, FormInput)

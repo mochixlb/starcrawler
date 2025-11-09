@@ -1,5 +1,20 @@
 import type { NextConfig } from "next";
 
+// Content Security Policy
+// Note: 'unsafe-inline' is required for Next.js hydration and inline styles
+// Nonces would be more secure but require dynamic rendering (disables static optimization)
+const cspHeader = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -7,6 +22,10 @@ const nextConfig: NextConfig = {
         // Apply security headers to all routes
         source: "/:path*",
         headers: [
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader,
+          },
           {
             key: "X-Frame-Options",
             value: "DENY", // Prevents clickjacking attacks
