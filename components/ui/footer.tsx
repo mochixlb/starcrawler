@@ -18,7 +18,7 @@ export function Footer({ className }: FooterProps) {
     >
       <div className="container mx-auto px-4 py-6 sm:px-6">
         <nav
-          className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center"
+          className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-center"
           aria-label="Legal links"
         >
           <Link
@@ -55,7 +55,7 @@ export function Footer({ className }: FooterProps) {
             href="https://github.com/mochixlb/starcrawler"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 cursor-pointer text-xs text-gray-300 transition-colors hover:text-crawl-yellow/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-sm"
+            className="inline-flex basis-full items-center justify-center gap-1.5 cursor-pointer text-xs text-gray-300 transition-colors hover:text-crawl-yellow/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:basis-auto sm:text-sm"
             style={{ letterSpacing: "0.05em", fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }}
             aria-label="View Star Crawler on GitHub"
           >
