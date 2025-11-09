@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { CRAWL_CONSTANTS } from "@/lib/constants";
 import { FadeMask } from "@/components/crawl/fade-mask";
@@ -16,6 +16,8 @@ export function CrawlDisplay({
   const controls = useAnimation();
   const [phase, setPhase] = useState<AnimationPhase>("opening-text");
   const [isComplete, setIsComplete] = useState(false);
+  const [crawlStarted, setCrawlStarted] = useState(false);
+  const animationStartedRef = useRef(false);
 
   // Check for reduced motion preference
   const shouldReduceMotion =
@@ -36,6 +38,8 @@ export function CrawlDisplay({
     if (!isPlaying) {
       setPhase("opening-text");
       setIsComplete(false);
+      setCrawlStarted(false);
+      animationStartedRef.current = false;
       controls.stop();
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
       return;
@@ -49,12 +53,23 @@ export function CrawlDisplay({
       return () => clearTimeout(timer);
     }
 
-    // Logo phase
+    // Logo phase - start crawl text 3 seconds before logo finishes
     if (phase === "logo") {
-      const timer = setTimeout(() => {
+      // Start crawl animation early (3 seconds before logo ends)
+      const crawlStartDelay = Math.max(0, (logoDuration - 3) * 1000);
+      const crawlStartTimer = setTimeout(() => {
+        setCrawlStarted(true);
+      }, crawlStartDelay);
+      
+      // Transition to crawl phase when logo finishes
+      const phaseTimer = setTimeout(() => {
         setPhase("crawl");
       }, logoDuration * 1000);
-      return () => clearTimeout(timer);
+      
+      return () => {
+        clearTimeout(crawlStartTimer);
+        clearTimeout(phaseTimer);
+      };
     }
 
     // Crawl phase completion timer
@@ -76,29 +91,29 @@ export function CrawlDisplay({
     onComplete,
   ]);
 
-  // Start crawl animation when phase becomes "crawl"
+  // Start crawl animation early (during logo phase) or when phase becomes "crawl"
   useEffect(() => {
-    if (phase === "crawl" && isPlaying) {
+    if ((crawlStarted || phase === "crawl") && isPlaying && !animationStartedRef.current) {
+      animationStartedRef.current = true;
       // Reset to starting position (off-screen at bottom)
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-      // Start animation after a brief delay to ensure DOM is ready
-      const startTimer = setTimeout(() => {
-        controls.start({
-          y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
-          transition: {
-            duration: crawlDuration,
-            ease: "linear",
-          },
-        });
-      }, CRAWL_CONSTANTS.ANIMATION_START_DELAY);
-      return () => clearTimeout(startTimer);
+      // Start animation immediately
+      controls.start({
+        y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
+        transition: {
+          duration: crawlDuration,
+          ease: "linear",
+        },
+      });
     }
-  }, [phase, isPlaying, controls, crawlDuration]);
+  }, [crawlStarted, phase, isPlaying, controls, crawlDuration]);
 
   // Reset when crawlData changes
   useEffect(() => {
     setPhase("opening-text");
     setIsComplete(false);
+    setCrawlStarted(false);
+    animationStartedRef.current = false;
     controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
   }, [crawlData, controls]);
 
@@ -187,13 +202,14 @@ export function CrawlDisplay({
       )}
 
       {/* Crawl Text - Scrolling animation with Episode info */}
-      {phase === "crawl" && (
+      {(crawlStarted || phase === "crawl") && (
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           style={{
             transform: `rotateX(${CRAWL_CONSTANTS.ROTATION}deg)`,
             transformOrigin: "50% 100%",
             transformStyle: "preserve-3d",
+            zIndex: phase === "logo" ? 10 : 20,
           }}
         >
           <motion.div

@@ -62,8 +62,7 @@ const config: Config = {
       },
       fontFamily: {
         crawl: [
-          '"Franklin Gothic Heavy"',
-          '"Franklin Gothic Demi"',
+          '"News Gothic Bold"',
           '"Arial Black"',
           "Impact",
           "sans-serif",
