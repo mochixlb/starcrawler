@@ -13,8 +13,8 @@ export const CRAWL_CONSTANTS = {
   LOGO_ANIMATION_DURATION: 8, // seconds for logo shrink/recede (matches original timing)
   OPENING_TEXT_DURATION: 6, // seconds to display opening text (matches original timing)
   CRAWL_START_POSITION: "100%", // Starting Y position (off-screen at bottom)
-  CRAWL_END_POSITION: "-150%", // Ending Y position (off-screen at top)
-  FADE_MASK_HEIGHT: "25%", // Height of fade masks (1/4 of viewport)
+  CRAWL_END_POSITION: "-200%", // Ending Y position (off-screen at top, further for fade effect)
+  FADE_MASK_HEIGHT: "30%", // Height of fade masks (increased for better fade effect)
 } as const;
 
 // Starfield constants

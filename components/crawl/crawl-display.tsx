@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
+import { X } from "lucide-react";
 import { CRAWL_CONSTANTS } from "@/lib/constants";
 import { FadeMask } from "@/components/crawl/fade-mask";
+import { Button } from "@/components/ui/button";
 import type { CrawlDisplayProps } from "@/lib/types";
 
 type AnimationPhase = "opening-text" | "logo" | "crawl";
@@ -12,11 +14,13 @@ export function CrawlDisplay({
   crawlData,
   isPlaying,
   isPaused = false,
-  speed = 1.0,
   onComplete,
   onProgressChange,
   seekTo,
-  isLooping = false,
+  onPause,
+  onResume,
+  onClose,
+  controlsVisible = true,
 }: CrawlDisplayProps) {
   const controls = useAnimation();
   const [phase, setPhase] = useState<AnimationPhase>("opening-text");
@@ -27,9 +31,7 @@ export function CrawlDisplay({
   const startTimeRef = useRef<number | null>(null);
   const totalPausedTimeRef = useRef(0);
   const pauseStartTimeRef = useRef<number | null>(null);
-  const previousSpeedRef = useRef(speed);
-  const isChangingSpeedRef = useRef(false);
-  const speedChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [crawlOpacity, setCrawlOpacity] = useState(1);
 
   // Check for reduced motion preference
   const shouldReduceMotion =
@@ -39,14 +41,14 @@ export function CrawlDisplay({
   // Base animation durations (for progress tracking)
   const baseCrawlDuration = shouldReduceMotion ? 5 : CRAWL_CONSTANTS.DURATION;
   
-  // Animation durations (adjusted by speed)
+  // Animation durations
   const openingTextDuration = shouldReduceMotion
     ? 1
-    : CRAWL_CONSTANTS.OPENING_TEXT_DURATION / speed;
+    : CRAWL_CONSTANTS.OPENING_TEXT_DURATION;
   const logoDuration = shouldReduceMotion
     ? 1
-    : CRAWL_CONSTANTS.LOGO_ANIMATION_DURATION / speed;
-  const crawlDuration = baseCrawlDuration / speed;
+    : CRAWL_CONSTANTS.LOGO_ANIMATION_DURATION;
+  const crawlDuration = baseCrawlDuration;
 
   // Handle pause/resume for crawl animation
   useEffect(() => {
@@ -77,105 +79,33 @@ export function CrawlDisplay({
         const endY = parseFloat(CRAWL_CONSTANTS.CRAWL_END_POSITION);
         const currentY = startY + (endY - startY) * currentProgressRef.current;
         
+        // Calculate target opacity based on current progress
+        const fadeStart = 0.7;
+        const fadeEnd = 1.0;
+        const targetOpacity = currentProgressRef.current >= fadeStart
+          ? Math.max(0, 1 - (currentProgressRef.current - fadeStart) / (fadeEnd - fadeStart))
+          : 1;
+        
         // Resume from current position
-        controls.set({ y: `${currentY}%` });
+        controls.set({ y: `${currentY}%`, opacity: crawlOpacity });
         controls.start({
           y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
+          opacity: targetOpacity,
           transition: {
             duration: remainingDuration,
             ease: "linear",
           },
+        }).then(() => {
+          // Animation completed - mark as complete
+          if (phase === "crawl" && !isComplete) {
+            setIsComplete(true);
+            onComplete?.();
+          }
         });
       }
     }
-  }, [isPaused, phase, crawlStarted, controls, crawlDuration, baseCrawlDuration]);
+  }, [isPaused, phase, crawlStarted, controls, crawlDuration, baseCrawlDuration, crawlOpacity, isComplete, onComplete]);
 
-  // Handle speed changes during all animation phases
-  useEffect(() => {
-    // Skip if speed hasn't actually changed
-    if (speed === previousSpeedRef.current) {
-      previousSpeedRef.current = speed;
-      isChangingSpeedRef.current = false;
-      return;
-    }
-
-    if (!isPlaying || isPaused) {
-      previousSpeedRef.current = speed;
-      isChangingSpeedRef.current = false;
-      return;
-    }
-
-    // Mark that we're changing speed to prevent phase transition effect from interfering
-    isChangingSpeedRef.current = true;
-    const previousSpeed = previousSpeedRef.current;
-
-    // Handle speed change during crawl phase
-    if (phase === "crawl" && crawlStarted && animationStartedRef.current) {
-      // Calculate current progress based on base duration
-      const elapsed = startTimeRef.current 
-        ? (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000
-        : 0;
-      currentProgressRef.current = Math.min(elapsed / baseCrawlDuration, 1);
-      const remainingDuration = crawlDuration * (1 - currentProgressRef.current);
-      
-      // Calculate current Y position
-      const startY = parseFloat(CRAWL_CONSTANTS.CRAWL_START_POSITION);
-      const endY = parseFloat(CRAWL_CONSTANTS.CRAWL_END_POSITION);
-      const currentY = startY + (endY - startY) * currentProgressRef.current;
-      
-      // Restart with new speed from current position
-      controls.set({ y: `${currentY}%` });
-      controls.start({
-        y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
-        transition: {
-          duration: remainingDuration,
-          ease: "linear",
-        },
-      });
-    }
-    
-    // For opening-text and logo phases, adjust phase start time based on speed change
-    // When speed changes, we need to recalculate the elapsed time proportionally
-    if ((phase === "opening-text" || phase === "logo") && phaseStartTimeRef.current !== null) {
-      // Calculate how much real time has elapsed in this phase
-      const realElapsed = (Date.now() - phaseStartTimeRef.current - phasePausedTimeRef.current) / 1000;
-      
-      // Determine the base phase duration (at 1x speed)
-      const basePhaseDuration = phase === "opening-text" 
-        ? CRAWL_CONSTANTS.OPENING_TEXT_DURATION 
-        : CRAWL_CONSTANTS.LOGO_ANIMATION_DURATION;
-      
-      // Calculate how much animation time has elapsed at the previous speed
-      // At previousSpeed, realElapsed seconds = realElapsed * previousSpeed animation seconds
-      const animationTimeElapsed = realElapsed * previousSpeed;
-      
-      // Calculate progress (0-1) based on base duration
-      const phaseProgress = Math.min(animationTimeElapsed / basePhaseDuration, 1);
-      
-      // Determine the new phase duration at the new speed
-      const newPhaseDuration = phase === "opening-text" ? openingTextDuration : logoDuration;
-      
-      // Calculate how much real time should have elapsed to reach this progress at new speed
-      // At speed, we need phaseProgress * newPhaseDuration animation seconds
-      // Which equals (phaseProgress * newPhaseDuration) / speed real seconds
-      const realTimeForProgress = (phaseProgress * newPhaseDuration) / speed;
-      
-      // Reset phase start time so that elapsed time calculation reflects the new speed
-      // We want: elapsed = (now - phaseStartTime) = realTimeForProgress
-      phaseStartTimeRef.current = Date.now() - (realTimeForProgress * 1000);
-      phasePausedTimeRef.current = 0;
-    }
-
-    previousSpeedRef.current = speed;
-    // Reset the flag after a brief delay to allow effects to settle
-    if (speedChangeTimeoutRef.current) {
-      clearTimeout(speedChangeTimeoutRef.current);
-    }
-    speedChangeTimeoutRef.current = setTimeout(() => {
-      isChangingSpeedRef.current = false;
-      speedChangeTimeoutRef.current = null;
-    }, 100);
-  }, [speed, phase, crawlStarted, isPlaying, isPaused, controls, crawlDuration, baseCrawlDuration, openingTextDuration, logoDuration]);
 
   // Calculate total duration (opening + logo + crawl)
   const totalDuration = openingTextDuration + logoDuration + baseCrawlDuration;
@@ -208,17 +138,40 @@ export function CrawlDisplay({
 
   // Track animation progress and report to parent
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && !isComplete) {
       const interval = setInterval(() => {
         if (overallStartTimeRef.current !== null && onProgressChange) {
           const overallElapsed = (Date.now() - overallStartTimeRef.current - overallPausedTimeRef.current - (overallPauseStartRef.current ? Date.now() - overallPauseStartRef.current : 0)) / 1000;
           const overallProgress = Math.min(overallElapsed / totalDuration, 1);
           const overallRemaining = Math.max(0, totalDuration - overallElapsed);
           
+          // Stop tracking if animation is complete
+          if (isComplete || overallRemaining <= 0) {
+            return;
+          }
+          
           // For crawl phase, also track crawl-specific progress
           if (phase === "crawl" && crawlStarted && startTimeRef.current !== null) {
             const crawlElapsed = (Date.now() - startTimeRef.current - totalPausedTimeRef.current - (pauseStartTimeRef.current ? Date.now() - pauseStartTimeRef.current : 0)) / 1000;
             currentProgressRef.current = Math.min(crawlElapsed / baseCrawlDuration, 1);
+            
+            // Fade out as text goes into the distance (start fading at 70% progress)
+            const fadeStart = 0.7;
+            const fadeEnd = 1.0;
+            if (currentProgressRef.current >= fadeStart) {
+              const fadeProgress = (currentProgressRef.current - fadeStart) / (fadeEnd - fadeStart);
+              const opacity = Math.max(0, 1 - fadeProgress);
+              setCrawlOpacity(opacity);
+            } else {
+              setCrawlOpacity(1);
+            }
+            
+            // If crawl animation has completed, mark as complete
+            if (crawlElapsed >= baseCrawlDuration && !isComplete) {
+              setIsComplete(true);
+              onComplete?.();
+              return;
+            }
           }
           
           onProgressChange(overallProgress, overallElapsed, overallRemaining);
@@ -227,7 +180,7 @@ export function CrawlDisplay({
 
       return () => clearInterval(interval);
     }
-  }, [isPlaying, phase, crawlStarted, isPaused, baseCrawlDuration, totalDuration, onProgressChange]);
+  }, [isPlaying, phase, crawlStarted, isPaused, baseCrawlDuration, totalDuration, onProgressChange, isComplete, onComplete]);
 
   // Track phase transition start times for pause/resume
   const phaseStartTimeRef = useRef<number | null>(null);
@@ -248,15 +201,13 @@ export function CrawlDisplay({
       phaseStartTimeRef.current = null;
       phasePausedTimeRef.current = 0;
       phasePauseStartRef.current = null;
-      previousSpeedRef.current = speed;
       controls.stop();
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
       return;
     }
 
     // Skip phase transition logic if we're in crawl phase - crawl animation handles its own timing
-    // Also skip if we're currently changing speed to prevent interference
-    if ((phase === "crawl" && crawlStarted) || isChangingSpeedRef.current) {
+    if (phase === "crawl" && crawlStarted) {
       return;
     }
 
@@ -342,47 +293,16 @@ export function CrawlDisplay({
         ? (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000
         : 0;
       const crawlRemaining = Math.max(0, baseCrawlDuration - crawlElapsed);
-      const remainingAtCurrentSpeed = crawlRemaining / speed;
       
       if (crawlRemaining <= 0) {
         setIsComplete(true);
-        if (isLooping) {
-          // Reset and restart for loop
-          setPhase("opening-text");
-          setIsComplete(false);
-          setCrawlStarted(false);
-          animationStartedRef.current = false;
-          currentProgressRef.current = 0;
-          startTimeRef.current = null;
-          totalPausedTimeRef.current = 0;
-          pauseStartTimeRef.current = null;
-          phaseStartTimeRef.current = Date.now();
-          phasePausedTimeRef.current = 0;
-          controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-        } else {
-          onComplete?.();
-        }
+        onComplete?.();
         return;
       }
       const timer = setTimeout(() => {
         setIsComplete(true);
-        if (isLooping) {
-          // Reset and restart for loop
-          setPhase("opening-text");
-          setIsComplete(false);
-          setCrawlStarted(false);
-          animationStartedRef.current = false;
-          currentProgressRef.current = 0;
-          startTimeRef.current = null;
-          totalPausedTimeRef.current = 0;
-          pauseStartTimeRef.current = null;
-          phaseStartTimeRef.current = Date.now();
-          phasePausedTimeRef.current = 0;
-          controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-        } else {
-          onComplete?.();
-        }
-      }, remainingAtCurrentSpeed * 1000);
+        onComplete?.();
+      }, crawlRemaining * 1000);
       return () => clearTimeout(timer);
     }
   }, [
@@ -395,9 +315,7 @@ export function CrawlDisplay({
     logoDuration,
     crawlDuration,
     onComplete,
-    isLooping,
     crawlStarted,
-    speed,
     baseCrawlDuration,
     startTimeRef,
     totalPausedTimeRef,
@@ -506,14 +424,33 @@ export function CrawlDisplay({
         overallPauseStartRef.current = null;
         
         controls.set({ y: `${targetY}%` });
+        
+        // Update opacity based on seek progress
+        const fadeStart = 0.7;
+        const fadeEnd = 1.0;
+        if (crawlSeekProgress >= fadeStart) {
+          const fadeProgress = (crawlSeekProgress - fadeStart) / (fadeEnd - fadeStart);
+          const opacity = Math.max(0, 1 - fadeProgress);
+          setCrawlOpacity(opacity);
+        } else {
+          setCrawlOpacity(1);
+        }
+        
         const remainingDuration = crawlDuration * (1 - crawlSeekProgress);
         if (!isPaused) {
           controls.start({
             y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
+            opacity: crawlSeekProgress >= fadeStart ? crawlOpacity : 1,
             transition: {
               duration: remainingDuration,
               ease: "linear",
             },
+          }).then(() => {
+            // Animation completed - mark as complete
+            if (phase === "crawl" && !isComplete) {
+              setIsComplete(true);
+              onComplete?.();
+            }
           });
         }
       }
@@ -528,20 +465,28 @@ export function CrawlDisplay({
       startTimeRef.current = Date.now();
       totalPausedTimeRef.current = 0;
       pauseStartTimeRef.current = null;
+      setCrawlOpacity(1); // Reset opacity when starting
       // Reset to starting position (off-screen at bottom)
-      controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-      // Start animation immediately
+      controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 });
+      // Start animation immediately with completion callback
       controls.start({
         y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
+        opacity: 0, // Fade to 0 at the end
         transition: {
           duration: crawlDuration,
           ease: "linear",
         },
+      }).then(() => {
+        // Animation completed - mark as complete
+        if (phase === "crawl" && !isComplete) {
+          setIsComplete(true);
+          onComplete?.();
+        }
       });
     }
-  }, [crawlStarted, phase, isPlaying, isPaused, controls, crawlDuration]);
+  }, [crawlStarted, phase, isPlaying, isPaused, controls, crawlDuration, isComplete, onComplete]);
 
-  // Reset when crawlData changes (NOT when speed changes!)
+  // Reset when crawlData changes
   // Use a ref to track previous crawlData to only reset when it actually changes
   const previousCrawlDataRef = useRef(crawlData);
   useEffect(() => {
@@ -561,11 +506,11 @@ export function CrawlDisplay({
       startTimeRef.current = null;
       totalPausedTimeRef.current = 0;
       pauseStartTimeRef.current = null;
-      previousSpeedRef.current = speed;
-      controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
+      setCrawlOpacity(1); // Reset opacity
+      controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 });
       previousCrawlDataRef.current = crawlData;
     }
-  }, [crawlData, controls]); // REMOVED speed from dependencies - this was causing the reset!
+  }, [crawlData, controls]);
 
   // Format crawl text into paragraphs
   const formatMessage = (text: string): string[] => {
@@ -579,9 +524,38 @@ export function CrawlDisplay({
     return null;
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't toggle if clicking on controls or other interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('[role="button"]') ||
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
+      target.closest('[role="slider"]')
+    ) {
+      return;
+    }
+    
+    // Toggle pause/play
+    if (isPaused && onResume) {
+      onResume();
+    } else if (!isPaused && onPause) {
+      onPause();
+    }
+  };
+
+  const handleClose = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering click-to-pause
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 z-10 overflow-hidden"
+      className="fixed inset-0 z-10 overflow-hidden cursor-pointer"
+      onClick={handleClick}
       style={{
         perspective: CRAWL_CONSTANTS.PERSPECTIVE,
         perspectiveOrigin: "50% 50%",
@@ -589,6 +563,20 @@ export function CrawlDisplay({
       aria-live="polite"
       aria-label="Opening crawl animation"
     >
+      {/* Close Button */}
+      {onClose && (
+        <Button
+          onClick={handleClose}
+          className={`fixed top-4 left-4 sm:left-auto sm:right-4 z-50 h-12 w-12 border-2 border-crawl-yellow/50 bg-black/90 p-0 text-crawl-yellow/90 backdrop-blur-md transition-all duration-300 hover:border-crawl-yellow hover:bg-crawl-yellow/15 hover:text-crawl-yellow focus-visible:ring-2 focus-visible:ring-crawl-yellow shadow-lg shadow-black/50 ${
+            controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Close crawl and return to form"
+          title="Close (Esc)"
+        >
+          <X className="size-6" />
+        </Button>
+      )}
+      
       <FadeMask position="top" />
       <FadeMask position="bottom" />
 
@@ -664,10 +652,13 @@ export function CrawlDisplay({
         >
           <motion.div
             className="w-full max-w-4xl px-8 text-center"
-            animate={controls}
-            initial={{ y: CRAWL_CONSTANTS.CRAWL_START_POSITION }}
+            animate={{
+              ...controls,
+              opacity: crawlOpacity,
+            }}
+            initial={{ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 }}
             style={{
-              willChange: "transform",
+              willChange: "transform, opacity",
             }}
           >
             <div

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useCallback } from "react";
+import { useState, useEffect, Suspense, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Share2 } from "lucide-react";
 import { Starfield } from "@/components/crawl/starfield";
 import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
 import { CrawlControls } from "@/components/crawl/crawl-controls";
-import { ShareButton } from "@/components/crawl/share-button";
+import { ShareModal } from "@/components/crawl/share-modal";
 import type { CrawlData } from "@/lib/types";
 import { decodeCrawlData, encodeCrawlData } from "@/lib/utils";
 
@@ -25,20 +25,23 @@ function HomeContent() {
   }, [initialEncoded]);
   
   const [crawlData, setCrawlData] = useState<CrawlData | null>(initialCrawlData);
-  const [isPlaying, setIsPlaying] = useState(!!initialEncoded);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [speed, setSpeed] = useState(1.0);
-  const [replayKey, setReplayKey] = useState(0);
   const [lastEncodedUrl, setLastEncodedUrl] = useState<string | null>(initialEncoded);
   const [progress, setProgress] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [remaining, setRemaining] = useState(0);
-  const [isLooping, setIsLooping] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const isFormSubmittingRef = useRef(false);
 
-  // Update crawl data when URL changes
+  // Update crawl data when URL changes (only for external/shared links)
   useEffect(() => {
+    // Skip if we're in the middle of a form submission
+    if (isFormSubmittingRef.current) return;
+    
     const encoded = searchParams.get("crawl");
     
     // Only reload if URL param changed
@@ -49,62 +52,49 @@ function HomeContent() {
       if (decoded) {
         setCrawlData(decoded);
         setLastEncodedUrl(encoded);
-        // Auto-play when loaded from shared link
-        setIsPlaying(true);
-        setIsPaused(false);
-        setSpeed(1.0);
+        // Only auto-play if this is a shared link (not our own form submission)
+        if (!isPlaying) {
+          setIsPlaying(true);
+          setIsPaused(false);
+        }
       }
     } else {
       // No crawl param - clear data if it was previously loaded from URL
-      if (lastEncodedUrl !== null) {
+      if (lastEncodedUrl !== null && !isPlaying) {
         setCrawlData(null);
         setIsPlaying(false);
         setLastEncodedUrl(null);
       }
     }
-  }, [searchParams, lastEncodedUrl]);
+  }, [searchParams, lastEncodedUrl, isPlaying]);
 
   // Handle form submission
   const handleSubmit = (data: CrawlData) => {
+    const encoded = encodeCrawlData(data);
+    // Mark that we're submitting to prevent useEffect interference
+    isFormSubmittingRef.current = true;
+    
+    // Set state first to start playing immediately
     setCrawlData(data);
     setIsPlaying(true);
     setIsPaused(false);
-    setSpeed(1.0);
-    // Update URL with encoded crawl data
-    const encoded = encodeCrawlData(data);
     setLastEncodedUrl(encoded);
-    router.replace(`/?crawl=${encoded}`, { scroll: false });
+    
+    // Update URL after state is set (non-blocking, won't interfere with playback)
+    requestAnimationFrame(() => {
+      router.replace(`/?crawl=${encoded}`, { scroll: false });
+      // Clear the flag after URL update completes
+      setTimeout(() => {
+        isFormSubmittingRef.current = false;
+      }, 100);
+    });
   };
 
   // Handle animation completion
   const handleComplete = () => {
     setIsPlaying(false);
     setIsPaused(false);
-    setSpeed(1.0);
   };
-
-  // Handle replay
-  const handleReplay = useCallback(() => {
-    if (crawlData) {
-      // Reset animation by incrementing replay key to force remount
-      setIsPlaying(false);
-      setIsPaused(false);
-      setSpeed(1.0);
-      setReplayKey((prev) => prev + 1);
-      
-      // Restart after a brief delay to ensure reset completes
-      setTimeout(() => {
-        setIsPlaying(true);
-      }, 50);
-    }
-  }, [crawlData]);
-
-  // Handle stop
-  const handleStop = useCallback(() => {
-    setIsPlaying(false);
-    setIsPaused(false);
-    setSpeed(1.0);
-  }, []);
 
   // Handle pause/resume
   const handlePause = useCallback(() => {
@@ -113,11 +103,6 @@ function HomeContent() {
 
   const handleResume = useCallback(() => {
     setIsPaused(false);
-  }, []);
-
-  // Handle speed change
-  const handleSpeedChange = useCallback((newSpeed: number) => {
-    setSpeed(newSpeed);
   }, []);
 
   // Handle progress updates from CrawlDisplay
@@ -135,11 +120,6 @@ function HomeContent() {
     setTimeout(() => {
       setSeekTo(undefined);
     }, 200);
-  }, []);
-
-  // Handle loop toggle
-  const handleToggleLoop = useCallback(() => {
-    setIsLooping((prev) => !prev);
   }, []);
 
   // Handle fullscreen toggle
@@ -198,33 +178,30 @@ function HomeContent() {
           const forwardProgress = Math.min(1, progress + 5 / (elapsed + remaining));
           handleSeek(forwardProgress);
           break;
-        case "r":
-        case "R":
-          e.preventDefault();
-          handleReplay();
-          break;
         case "f":
         case "F":
           e.preventDefault();
           handleToggleFullscreen();
+          break;
+        case "Escape":
+          e.preventDefault();
+          handleComplete();
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, crawlData, isPaused, progress, elapsed, remaining, handlePause, handleResume, handleReplay, handleToggleFullscreen, handleSeek]);
+  }, [isPlaying, crawlData, isPaused, progress, elapsed, remaining, handlePause, handleResume, handleToggleFullscreen, handleSeek, handleComplete]);
 
   // Reset to input form
   const handleReset = () => {
     setCrawlData(null);
     setIsPlaying(false);
     setIsPaused(false);
-    setSpeed(1.0);
     setProgress(0);
     setElapsed(0);
     setRemaining(0);
-    setIsLooping(false);
     setIsFullscreen(false);
     setSeekTo(undefined);
     // Clear URL params
@@ -241,10 +218,10 @@ function HomeContent() {
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1 className="mb-2 font-crawl text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
+              <h1 className="mb-3 font-crawl text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl" style={{ letterSpacing: "0.15em" }}>
                 STAR CRAWLER
               </h1>
-              <p className="text-sm text-gray-200 sm:text-base">
+              <p className="font-opening-text text-sm text-gray-300 sm:text-base" style={{ letterSpacing: "0.05em" }}>
                 Create and share your own opening crawl
               </p>
             </div>
@@ -256,10 +233,25 @@ function HomeContent() {
 
             {crawlData && !isPlaying && (
               <div className="mt-6 flex justify-center gap-3">
-                <ShareButton crawlData={crawlData} />
+                <button
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="inline-flex items-center gap-2 border-2 border-crawl-yellow/40 bg-black/80 px-4 min-[375px]:px-5 py-2.5 font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 touch-manipulation cursor-pointer"
+                  style={{
+                    letterSpacing: "0.1em",
+                    clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+                  }}
+                  aria-label="Share"
+                >
+                  <Share2 className="size-4 shrink-0" />
+                  <span>Share</span>
+                </button>
                 <button
                   onClick={handleReset}
-                  className="inline-flex items-center gap-2 rounded-md border border-crawl-yellow/50 bg-black/80 px-4 min-[375px]:px-5 py-2.5 text-sm font-medium text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 touch-manipulation cursor-pointer"
+                  className="inline-flex items-center gap-2 border-2 border-crawl-yellow/40 bg-black/80 px-4 min-[375px]:px-5 py-2.5 font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 touch-manipulation cursor-pointer"
+                  style={{
+                    letterSpacing: "0.1em",
+                    clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+                  }}
                 >
                   <RotateCcw className="size-4 shrink-0" />
                   <span>Reset</span>
@@ -269,40 +261,44 @@ function HomeContent() {
           </div>
         ) : (
           <CrawlDisplay
-            key={replayKey}
             crawlData={crawlData}
             isPlaying={isPlaying}
             isPaused={isPaused}
-            speed={speed}
             onComplete={handleComplete}
             onProgressChange={handleProgressChange}
             seekTo={seekTo}
-            isLooping={isLooping}
+            onPause={handlePause}
+            onResume={handleResume}
+            onClose={handleComplete}
+            controlsVisible={controlsVisible}
           />
         )}
 
         {/* Controls overlay when crawl is playing */}
         {isPlaying && crawlData && (
-          <div className="fixed bottom-4 left-1/2 z-30 w-full max-w-4xl -translate-x-1/2 px-4">
-            <CrawlControls
-              isPaused={isPaused}
-              speed={speed}
-              crawlData={crawlData}
-              progress={progress}
-              elapsed={elapsed}
-              remaining={remaining}
-              isLooping={isLooping}
-              isFullscreen={isFullscreen}
-              onPause={handlePause}
-              onResume={handleResume}
-              onSpeedChange={handleSpeedChange}
-              onReplay={handleReplay}
-              onStop={handleStop}
-              onSeek={handleSeek}
-              onToggleLoop={handleToggleLoop}
-              onToggleFullscreen={handleToggleFullscreen}
-            />
-          </div>
+          <CrawlControls
+            isPaused={isPaused}
+            crawlData={crawlData}
+            progress={progress}
+            elapsed={elapsed}
+            remaining={remaining}
+            isFullscreen={isFullscreen}
+            onPause={handlePause}
+            onResume={handleResume}
+            onSeek={handleSeek}
+            onToggleFullscreen={handleToggleFullscreen}
+            controlsVisible={controlsVisible}
+            onControlsVisibilityChange={setControlsVisible}
+          />
+        )}
+
+        {/* Share Modal */}
+        {crawlData && (
+          <ShareModal
+            crawlData={crawlData}
+            isOpen={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+          />
         )}
       </div>
     </main>

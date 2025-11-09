@@ -11,6 +11,13 @@ import type { CrawlInputProps } from "@/lib/types";
 
 const DEFAULT_OPENING_TEXT = "A long time ago in a galaxy far, far away....";
 const DEFAULT_LOGO_TEXT = "STAR CRAWLER";
+const DEFAULT_EPISODE_NUMBER = "I";
+const DEFAULT_EPISODE_SUBTITLE = "The Quest Begins";
+const DEFAULT_CRAWL_TEXT = `It is a period of exploration. Adventurous travelers, journeying from distant worlds, have discovered new realms beyond the known galaxy.
+
+During their travels, these wanderers uncovered ancient secrets and forgotten knowledge, hidden within the depths of uncharted space.
+
+Pursued by the mysteries of the cosmos, a lone explorer ventures forth, guardian of discoveries that may unlock new understanding and reveal the wonders of the universe...`;
 
 export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
   const [openingText, setOpeningText] = useState(
@@ -20,12 +27,12 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
     initialData?.logoText || DEFAULT_LOGO_TEXT
   );
   const [episodeNumber, setEpisodeNumber] = useState(
-    initialData?.episodeNumber || ""
+    initialData?.episodeNumber || DEFAULT_EPISODE_NUMBER
   );
   const [episodeSubtitle, setEpisodeSubtitle] = useState(
-    initialData?.episodeSubtitle || ""
+    initialData?.episodeSubtitle || DEFAULT_EPISODE_SUBTITLE
   );
-  const [crawlText, setCrawlText] = useState(initialData?.crawlText || "");
+  const [crawlText, setCrawlText] = useState(initialData?.crawlText || DEFAULT_CRAWL_TEXT);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate character count for crawl text
@@ -65,7 +72,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-3">
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-4">
       {/* Opening Text Input */}
       <FormInput
         id="opening-text"
@@ -88,14 +95,14 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
       />
 
       {/* Episode Number and Subtitle */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <FormInput
           id="episode-number"
           label="Episode Number"
           type="text"
           value={episodeNumber}
           onChange={(e) => setEpisodeNumber(e.target.value)}
-          placeholder="IV"
+          placeholder={DEFAULT_EPISODE_NUMBER}
         />
         <FormInput
           id="episode-subtitle"
@@ -103,15 +110,16 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
           type="text"
           value={episodeSubtitle}
           onChange={(e) => setEpisodeSubtitle(e.target.value)}
-          placeholder="A New Hope"
+          placeholder={DEFAULT_EPISODE_SUBTITLE}
         />
       </div>
 
       {/* Crawl Text Input */}
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <label
           htmlFor="crawl-text"
-          className="text-xs font-medium text-crawl-yellow sm:text-sm"
+          className="block font-crawl text-xs font-bold uppercase tracking-wider text-crawl-yellow sm:text-sm"
+          style={{ letterSpacing: "0.1em" }}
         >
           Crawl Text
         </label>
@@ -119,20 +127,20 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
           id="crawl-text"
           value={crawlText}
           onChange={handleCrawlTextChange}
-          placeholder="It is a period of civil war..."
-          className="min-h-[120px] border-crawl-yellow/30 bg-black text-sm text-white placeholder:text-gray-400 focus:border-crawl-yellow focus:ring-crawl-yellow sm:min-h-[140px]"
+          placeholder={DEFAULT_CRAWL_TEXT}
+          className="min-h-[180px] sm:min-h-[200px]"
           aria-describedby="crawl-help crawl-error"
         />
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
             <p
               id="crawl-help"
-              className={`text-[10px] sm:text-xs ${
+              className={`font-opening-text text-[10px] sm:text-xs ${
                 isCrawlOverLimit
                   ? "text-red-500"
                   : isCrawlUnderLimit
-                    ? "text-yellow-500"
-                    : "text-gray-300"
+                    ? "text-crawl-yellow/70"
+                    : "text-gray-400"
               }`}
             >
               {crawlTextLength} / {FORM_CONSTANTS.MAX_MESSAGE_LENGTH} characters
@@ -140,7 +148,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
             {error && (
               <p
                 id="crawl-error"
-                className="text-[10px] text-red-500 sm:text-xs"
+                className="font-opening-text text-[10px] text-red-500 sm:text-xs"
                 role="alert"
               >
                 {error}
@@ -152,10 +160,14 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
 
       <Button
         type="submit"
-        className="mt-6 w-full bg-crawl-yellow py-2.5 text-sm font-bold text-black transition-colors hover:bg-crawl-yellow/90 sm:py-3 sm:text-base"
+        className="mt-6 w-full border-2 border-crawl-yellow bg-crawl-yellow py-3 font-crawl text-sm font-bold uppercase tracking-wider text-black transition-colors hover:bg-crawl-yellow/90 disabled:border-crawl-yellow/30 disabled:bg-crawl-yellow/20 disabled:text-crawl-yellow/50 sm:py-3.5 sm:text-base"
+        style={{
+          letterSpacing: "0.1em",
+          clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
+        }}
         disabled={isCrawlOverLimit || !crawlText.trim()}
       >
-        <Play className="size-4 fill-current" />
+        <Play className="mr-2 size-4 fill-current" />
         Play Crawl
       </Button>
     </form>

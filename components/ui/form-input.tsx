@@ -20,13 +20,14 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
         : "border-crawl-yellow/30 focus:border-crawl-yellow focus:ring-crawl-yellow/50";
 
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <label
           htmlFor={inputId}
           className={cn(
-            "text-xs font-medium sm:text-sm",
+            "block font-crawl text-xs font-bold uppercase tracking-wider sm:text-sm",
             labelColorClass
           )}
+          style={{ letterSpacing: "0.1em" }}
         >
           {label}
         </label>
@@ -34,10 +35,13 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            "w-full rounded-md border bg-black px-3 py-1.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2",
+            "w-full border-2 bg-black px-4 py-2.5 font-opening-text text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black",
             borderColorClass,
             className
           )}
+          style={{
+            clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+          }}
           {...props}
         />
       </div>

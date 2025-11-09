@@ -6,8 +6,9 @@ interface FadeMaskProps {
 
 export function FadeMask({ position }: FadeMaskProps) {
   const isTop = position === "top";
+  // Stronger fade at top for better distance fade effect
   const gradient = isTop
-    ? "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)"
+    ? "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0) 100%)"
     : "linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%)";
 
   return (
@@ -22,4 +23,3 @@ export function FadeMask({ position }: FadeMaskProps) {
     />
   );
 }
-

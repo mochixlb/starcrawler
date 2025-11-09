@@ -16,10 +16,12 @@ export interface CrawlDisplayProps {
   crawlData: CrawlData;
   isPlaying: boolean;
   isPaused?: boolean;
-  speed?: number;
   onComplete?: () => void;
   onProgressChange?: (progress: number, elapsed: number, remaining: number) => void;
   seekTo?: number; // Progress value 0-1 to seek to
-  isLooping?: boolean;
+  onPause?: () => void;
+  onResume?: () => void;
+  onClose?: () => void;
+  controlsVisible?: boolean;
 }
 
