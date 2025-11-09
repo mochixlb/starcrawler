@@ -14,9 +14,10 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 ## Features
 
 - **Cinematic Animation**: Three-phase sequence (opening text → logo → scrolling crawl) with animated starfield background
-- **Playback Controls**: Play/pause, seek, and fullscreen
-- **Keyboard Shortcuts**: Space (pause/resume), Arrow keys (seek), R (replay), F (fullscreen)
-- **Shareable Links**: URL-encoded crawl data - no database required
+- **Playback Controls**: Play/pause, seek slider, and fullscreen mode
+- **Keyboard Shortcuts**: Space (pause/resume), Arrow keys (seek ±5s), F (fullscreen), Escape (stop)
+- **Sharing**: Share modal with social media options (Twitter, Facebook, WhatsApp, Email), Web Share API support, and URL copy
+- **URL-Based State**: Shareable links with URL-encoded crawl data (no database required)
 - **Accessibility**: Respects `prefers-reduced-motion` preferences
 - **Responsive**: Optimized for desktop and mobile devices
 - **Form Validation**: Crawl text validation (10-2000 characters)
@@ -44,7 +45,7 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 1. Enter your opening text, logo, episode info, and crawl text
 2. Click "Play Crawl" to start the animation
 3. Use controls to pause, seek, or share
-4. Share via URL or copy text to clipboard
+4. Share via URL or social media platforms
 
 Animation constants are centralized in `lib/constants.ts` for easy customization.
 
