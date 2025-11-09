@@ -36,9 +36,9 @@ describe("cn", () => {
 describe("encodeCrawlData", () => {
   const validCrawlData: CrawlData = {
     openingText: "A long time ago...",
-    logoText: "STAR WARS",
+    logoText: "EPISODE LOGO",
     episodeNumber: "IV",
-    episodeSubtitle: "A NEW HOPE",
+    episodeSubtitle: "THE BEGINNING",
     crawlText: "It is a period of civil war.",
   };
 
@@ -95,9 +95,9 @@ describe("encodeCrawlData", () => {
 describe("decodeCrawlData", () => {
   const validCrawlData: CrawlData = {
     openingText: "A long time ago...",
-    logoText: "STAR WARS",
+    logoText: "EPISODE LOGO",
     episodeNumber: "IV",
-    episodeSubtitle: "A NEW HOPE",
+    episodeSubtitle: "THE BEGINNING",
     crawlText: "It is a period of civil war.",
   };
 
@@ -137,9 +137,9 @@ describe("decodeCrawlData", () => {
     // Create encoded data with invalid crawl text (too short)
     const invalidData = {
       openingText: "A long time ago...",
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "short", // Too short
     };
 
@@ -295,18 +295,18 @@ describe("buildCrawlText", () => {
   it("should build complete crawl text with all fields", () => {
     const crawlData: CrawlData = {
       openingText: "A long time ago...",
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "It is a period of civil war.",
     };
 
     const result = buildCrawlText(crawlData);
 
     expect(result).toContain("A long time ago...");
-    expect(result).toContain("STAR WARS");
+    expect(result).toContain("EPISODE LOGO");
     expect(result).toContain("EPISODE IV");
-    expect(result).toContain("A NEW HOPE");
+    expect(result).toContain("THE BEGINNING");
     expect(result).toContain("It is a period of civil war.");
   });
 
@@ -342,7 +342,7 @@ describe("buildCrawlText", () => {
   it("should include logo text with proper spacing", () => {
     const crawlData: CrawlData = {
       openingText: "A long time ago...",
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "",
       episodeSubtitle: "",
       crawlText: "It is a period of civil war.",
@@ -351,7 +351,7 @@ describe("buildCrawlText", () => {
     const result = buildCrawlText(crawlData);
     const parts = result.split("\n");
 
-    expect(parts).toContain("STAR WARS");
+    expect(parts).toContain("EPISODE LOGO");
   });
 
   it("should format episode number with EPISODE prefix", () => {
@@ -373,13 +373,13 @@ describe("buildCrawlText", () => {
       openingText: "",
       logoText: "",
       episodeNumber: "",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "It is a period of civil war.",
     };
 
     const result = buildCrawlText(crawlData);
 
-    expect(result).toContain("A NEW HOPE");
+    expect(result).toContain("THE BEGINNING");
   });
 
   it("should combine episode number and subtitle", () => {
@@ -387,14 +387,14 @@ describe("buildCrawlText", () => {
       openingText: "",
       logoText: "",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "It is a period of civil war.",
     };
 
     const result = buildCrawlText(crawlData);
 
     expect(result).toContain("EPISODE IV");
-    expect(result).toContain("A NEW HOPE");
+    expect(result).toContain("THE BEGINNING");
   });
 
   it("should handle empty strings gracefully", () => {

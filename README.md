@@ -1,6 +1,6 @@
 # Star Crawler
 
-A free, open-source web app for creating and sharing cinematic Star Wars-style opening crawl animations.
+A free, open-source web app for creating and sharing cinematic opening crawl animations.
 
 ## Quick Start
 

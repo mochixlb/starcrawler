@@ -7,9 +7,9 @@ describe("crawlDataSchema", () => {
     it("should accept valid opening text", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -22,9 +22,9 @@ describe("crawlDataSchema", () => {
     it("should trim whitespace from opening text", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "  A long time ago...  ",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -37,9 +37,9 @@ describe("crawlDataSchema", () => {
     it("should use default when opening text is empty", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -55,9 +55,9 @@ describe("crawlDataSchema", () => {
       const longText = "A".repeat(FORM_CONSTANTS.MAX_OPENING_TEXT_LENGTH + 1);
       const result = crawlDataSchema.safeParse({
         openingText: longText,
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -74,30 +74,30 @@ describe("crawlDataSchema", () => {
     it("should accept valid logo text", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.logoText).toBe("STAR WARS");
+        expect(result.data.logoText).toBe("EPISODE LOGO");
       }
     });
 
     it("should convert logo text to uppercase", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "star wars",
+        logoText: "episode logo",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.logoText).toBe("STAR WARS");
+        expect(result.data.logoText).toBe("EPISODE LOGO");
       }
     });
 
@@ -106,7 +106,7 @@ describe("crawlDataSchema", () => {
         openingText: "A long time ago...",
         logoText: "   ",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -122,7 +122,7 @@ describe("crawlDataSchema", () => {
         openingText: "A long time ago...",
         logoText: longText,
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -139,9 +139,9 @@ describe("crawlDataSchema", () => {
     it("should accept valid episode number", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -154,9 +154,9 @@ describe("crawlDataSchema", () => {
     it("should convert episode number to uppercase and trim", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "  iv  ",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -169,9 +169,9 @@ describe("crawlDataSchema", () => {
     it("should accept empty episode number", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -185,9 +185,9 @@ describe("crawlDataSchema", () => {
       const longText = "A".repeat(FORM_CONSTANTS.MAX_EPISODE_NUMBER_LENGTH + 1);
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: longText,
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -204,37 +204,37 @@ describe("crawlDataSchema", () => {
     it("should accept valid episode subtitle", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.episodeSubtitle).toBe("A NEW HOPE");
+        expect(result.data.episodeSubtitle).toBe("THE BEGINNING");
       }
     });
 
     it("should convert episode subtitle to uppercase and trim", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "  a new hope  ",
+        episodeSubtitle: "  the beginning  ",
         crawlText: "It is a period of civil war.",
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.episodeSubtitle).toBe("A NEW HOPE");
+        expect(result.data.episodeSubtitle).toBe("THE BEGINNING");
       }
     });
 
     it("should accept empty episode subtitle", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
         episodeSubtitle: "",
         crawlText: "It is a period of civil war.",
@@ -252,7 +252,7 @@ describe("crawlDataSchema", () => {
       );
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
         episodeSubtitle: longText,
         crawlText: "It is a period of civil war.",
@@ -271,9 +271,9 @@ describe("crawlDataSchema", () => {
     it("should accept valid crawl text", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
 
@@ -286,9 +286,9 @@ describe("crawlDataSchema", () => {
     it("should trim whitespace from crawl text", () => {
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "  It is a period of civil war.  ",
       });
 
@@ -302,9 +302,9 @@ describe("crawlDataSchema", () => {
       const shortText = "A".repeat(FORM_CONSTANTS.MIN_MESSAGE_LENGTH - 1);
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: shortText,
       });
 
@@ -320,9 +320,9 @@ describe("crawlDataSchema", () => {
       const minText = "A".repeat(FORM_CONSTANTS.MIN_MESSAGE_LENGTH);
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: minText,
       });
 
@@ -336,9 +336,9 @@ describe("crawlDataSchema", () => {
       const longText = "A".repeat(FORM_CONSTANTS.MAX_MESSAGE_LENGTH + 1);
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: longText,
       });
 
@@ -354,9 +354,9 @@ describe("crawlDataSchema", () => {
       const maxText = "A".repeat(FORM_CONSTANTS.MAX_MESSAGE_LENGTH);
       const result = crawlDataSchema.safeParse({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: maxText,
       });
 
@@ -371,9 +371,9 @@ describe("crawlDataSchema", () => {
     it("should validate complete valid crawl data", () => {
       const validData = {
         openingText: "A long time ago in a galaxy far, far away....",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText:
           "It is a period of civil war. Rebel spaceships, striking from a hidden base, have won their first victory against the evil Galactic Empire.",
       };
@@ -384,9 +384,9 @@ describe("crawlDataSchema", () => {
       if (result.success) {
         expect(result.data).toMatchObject({
           openingText: validData.openingText,
-          logoText: "STAR WARS",
+          logoText: "EPISODE LOGO",
           episodeNumber: "IV",
-          episodeSubtitle: "A NEW HOPE",
+          episodeSubtitle: "THE BEGINNING",
           crawlText: validData.crawlText,
         });
       }
@@ -395,9 +395,9 @@ describe("crawlDataSchema", () => {
     it("should reject invalid data types", () => {
       const invalidData = {
         openingText: 123,
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       };
 
@@ -409,7 +409,7 @@ describe("crawlDataSchema", () => {
     it("should reject missing required fields", () => {
       const incompleteData = {
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         // Missing episodeNumber, episodeSubtitle, crawlText
       };
 
@@ -424,9 +424,9 @@ describe("validateCrawlData", () => {
   it("should return success with validated data for valid input", () => {
     const validData = {
       openingText: "A long time ago...",
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "It is a period of civil war.",
     };
 
@@ -436,9 +436,9 @@ describe("validateCrawlData", () => {
     if (result.success) {
       expect(result.data).toMatchObject({
         openingText: "A long time ago...",
-        logoText: "STAR WARS",
+        logoText: "EPISODE LOGO",
         episodeNumber: "IV",
-        episodeSubtitle: "A NEW HOPE",
+        episodeSubtitle: "THE BEGINNING",
         crawlText: "It is a period of civil war.",
       });
     }
@@ -447,9 +447,9 @@ describe("validateCrawlData", () => {
   it("should return error for invalid input", () => {
     const invalidData = {
       openingText: "A".repeat(FORM_CONSTANTS.MAX_OPENING_TEXT_LENGTH + 1),
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "It is a period of civil war.",
     };
 
@@ -465,9 +465,9 @@ describe("validateCrawlData", () => {
   it("should return error message for missing crawl text", () => {
     const invalidData = {
       openingText: "A long time ago...",
-      logoText: "STAR WARS",
+      logoText: "EPISODE LOGO",
       episodeNumber: "IV",
-      episodeSubtitle: "A NEW HOPE",
+      episodeSubtitle: "THE BEGINNING",
       crawlText: "short", // Too short
     };
 
