@@ -12,10 +12,9 @@ import {
   Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { copyToClipboard, formatTime, buildCrawlText } from "@/lib/utils";
+import { copyToClipboard, formatTime, buildCrawlText, encodeCrawlData, getBaseUrl, isUrlLengthSafe } from "@/lib/utils";
 import { UI_CONSTANTS } from "@/lib/constants";
 import type { CrawlData } from "@/lib/types";
-import { ShareModal } from "./share-modal";
 
 export interface CrawlControlsProps {
   isPaused: boolean;
@@ -132,12 +131,12 @@ export function CrawlControls({
 }: CrawlControlsProps) {
   const { copied: copiedText, showFeedback: showTextFeedback } =
     useCopyFeedback();
+  const { copied: copiedUrl, showFeedback: showUrlFeedback } =
+    useCopyFeedback();
   const [internalVisible, setInternalVisible] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showCenterButton, setShowCenterButton] = useState(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
-  const centerButtonDelayRef = useRef<NodeJS.Timeout | null>(null);
   const wasPausedBeforeDragRef = useRef<boolean | null>(null);
   const isDraggingRef = useRef(false);
   const onChangeCallCountRef = useRef(0);
@@ -198,8 +197,23 @@ export function CrawlControls({
     };
   }, [isVisible, setIsVisible]);
 
-  const handleShare = () => {
-    setIsShareModalOpen(true);
+  const handleShareUrl = async () => {
+    try {
+      const encoded = encodeCrawlData(crawlData);
+      const baseUrl = getBaseUrl();
+      
+      if (!isUrlLengthSafe(baseUrl, encoded)) {
+        return;
+      }
+      
+      const shareUrl = `${baseUrl}?crawl=${encoded}`;
+      const success = await copyToClipboard(shareUrl);
+      if (success) {
+        showUrlFeedback();
+      }
+    } catch {
+      // Silently handle errors
+    }
   };
 
   const handleCopyText = async () => {
@@ -442,11 +456,12 @@ export function CrawlControls({
                 icon={<Copy className="size-3.5 shrink-0" />}
                 title="Copy text"
               />
-              <IconButton
-                onClick={handleShare}
-                ariaLabel="Share"
-                title="Share"
-                icon={<Share2 className="size-5" />}
+              <CopyButton
+                onClick={handleShareUrl}
+                copied={copiedUrl}
+                label="Share"
+                icon={<Share2 className="size-3.5 shrink-0" />}
+                title="Share URL"
               />
               {/* Hide fullscreen button on mobile since it's already full screen */}
               <div className="hidden sm:flex">
@@ -473,13 +488,6 @@ export function CrawlControls({
           </div>
         </div>
       </div>
-
-      {/* Share Modal */}
-      <ShareModal
-        crawlData={crawlData}
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-      />
     </>
   );
 }

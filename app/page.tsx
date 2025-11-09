@@ -1,22 +1,35 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  Suspense,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { RotateCcw, Share2 } from "lucide-react";
+import { RotateCcw, Share2, Check } from "lucide-react";
 import { Starfield } from "@/components/crawl/starfield";
 import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
 import { CrawlControls } from "@/components/crawl/crawl-controls";
-import { ShareModal } from "@/components/crawl/share-modal";
 import { Footer } from "@/components/ui/footer";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import type { CrawlData } from "@/lib/types";
-import { decodeCrawlData, encodeCrawlData } from "@/lib/utils";
+import {
+  decodeCrawlData,
+  encodeCrawlData,
+  copyToClipboard,
+  getBaseUrl,
+  isUrlLengthSafe,
+} from "@/lib/utils";
+import { UI_CONSTANTS } from "@/lib/constants";
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // Initialize state immediately from URL to prevent flash
   const initialEncoded = searchParams.get("crawl");
   const initialCrawlData = useMemo(() => {
@@ -25,31 +38,37 @@ function HomeContent() {
     }
     return null;
   }, [initialEncoded]);
-  
-  const [crawlData, setCrawlData] = useState<CrawlData | null>(initialCrawlData);
+
+  const [crawlData, setCrawlData] = useState<CrawlData | null>(
+    initialCrawlData
+  );
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [lastEncodedUrl, setLastEncodedUrl] = useState<string | null>(initialEncoded);
+  const [lastEncodedUrl, setLastEncodedUrl] = useState<string | null>(
+    initialEncoded
+  );
   const [progress, setProgress] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [crawlPhase, setCrawlPhase] = useState<"opening-text" | "logo" | "crawl">("opening-text");
+  const [urlCopied, setUrlCopied] = useState(false);
+  const [crawlPhase, setCrawlPhase] = useState<
+    "opening-text" | "logo" | "crawl"
+  >("opening-text");
   const isFormSubmittingRef = useRef(false);
 
   // Update crawl data when URL changes (only for external/shared links)
   useEffect(() => {
     // Skip if we're in the middle of a form submission
     if (isFormSubmittingRef.current) return;
-    
+
     const encoded = searchParams.get("crawl");
-    
+
     // Only reload if URL param changed
     if (encoded === lastEncodedUrl) return;
-    
+
     if (encoded) {
       const decoded = decodeCrawlData(encoded);
       if (decoded) {
@@ -76,13 +95,13 @@ function HomeContent() {
     const encoded = encodeCrawlData(data);
     // Mark that we're submitting to prevent useEffect interference
     isFormSubmittingRef.current = true;
-    
+
     // Set state first to start playing immediately
     setCrawlData(data);
     setIsPlaying(true);
     setIsPaused(false);
     setLastEncodedUrl(encoded);
-    
+
     // Update URL after state is set (non-blocking, won't interfere with playback)
     requestAnimationFrame(() => {
       router.replace(`/?crawl=${encoded}`, { scroll: false });
@@ -110,27 +129,33 @@ function HomeContent() {
   }, []);
 
   // Handle progress updates from CrawlDisplay
-  const handleProgressChange = useCallback((newProgress: number, newElapsed: number, newRemaining: number) => {
-    setProgress(newProgress);
-    setElapsed(newElapsed);
-    setRemaining(newRemaining);
-  }, []);
+  const handleProgressChange = useCallback(
+    (newProgress: number, newElapsed: number, newRemaining: number) => {
+      setProgress(newProgress);
+      setElapsed(newElapsed);
+      setRemaining(newRemaining);
+    },
+    []
+  );
 
   // Handle seeking
-  const handleSeek = useCallback((newProgress: number) => {
-    setSeekTo(newProgress);
-    // Update progress immediately for visual feedback (slider position)
-    const totalDuration = elapsed + remaining || 1; // Fallback to 1 to avoid division by zero
-    const newElapsed = newProgress * totalDuration;
-    const newRemaining = totalDuration - newElapsed;
-    setProgress(newProgress);
-    setElapsed(newElapsed);
-    setRemaining(newRemaining);
-    // Clear seekTo after a longer delay to ensure it's processed
-    setTimeout(() => {
-      setSeekTo(undefined);
-    }, 200);
-  }, [elapsed, remaining]);
+  const handleSeek = useCallback(
+    (newProgress: number) => {
+      setSeekTo(newProgress);
+      // Update progress immediately for visual feedback (slider position)
+      const totalDuration = elapsed + remaining || 1; // Fallback to 1 to avoid division by zero
+      const newElapsed = newProgress * totalDuration;
+      const newRemaining = totalDuration - newElapsed;
+      setProgress(newProgress);
+      setElapsed(newElapsed);
+      setRemaining(newRemaining);
+      // Clear seekTo after a longer delay to ensure it's processed
+      setTimeout(() => {
+        setSeekTo(undefined);
+      }, 200);
+    },
+    [elapsed, remaining]
+  );
 
   // Handle fullscreen toggle
   const handleToggleFullscreen = useCallback(() => {
@@ -150,7 +175,8 @@ function HomeContent() {
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   // Global keyboard shortcuts
@@ -178,13 +204,19 @@ function HomeContent() {
         case "ArrowLeft":
           e.preventDefault();
           // Seek backward 5 seconds
-          const backwardProgress = Math.max(0, progress - 5 / (elapsed + remaining));
+          const backwardProgress = Math.max(
+            0,
+            progress - 5 / (elapsed + remaining)
+          );
           handleSeek(backwardProgress);
           break;
         case "ArrowRight":
           e.preventDefault();
           // Seek forward 5 seconds
-          const forwardProgress = Math.min(1, progress + 5 / (elapsed + remaining));
+          const forwardProgress = Math.min(
+            1,
+            progress + 5 / (elapsed + remaining)
+          );
           handleSeek(forwardProgress);
           break;
         case "f":
@@ -201,7 +233,19 @@ function HomeContent() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, crawlData, isPaused, progress, elapsed, remaining, handlePause, handleResume, handleToggleFullscreen, handleSeek, handleComplete]);
+  }, [
+    isPlaying,
+    crawlData,
+    isPaused,
+    progress,
+    elapsed,
+    remaining,
+    handlePause,
+    handleResume,
+    handleToggleFullscreen,
+    handleSeek,
+    handleComplete,
+  ]);
 
   // Reset to input form
   const handleReset = () => {
@@ -218,6 +262,32 @@ function HomeContent() {
     router.replace("/", { scroll: false });
   };
 
+  // Handle URL sharing - copy to clipboard
+  const handleShareUrl = useCallback(async () => {
+    if (!crawlData) return;
+
+    try {
+      const encoded = encodeCrawlData(crawlData);
+      const baseUrl = getBaseUrl();
+
+      if (!isUrlLengthSafe(baseUrl, encoded)) {
+        return;
+      }
+
+      const shareUrl = `${baseUrl}?crawl=${encoded}`;
+      const success = await copyToClipboard(shareUrl);
+      if (success) {
+        setUrlCopied(true);
+        setTimeout(
+          () => setUrlCopied(false),
+          UI_CONSTANTS.COPY_FEEDBACK_DURATION
+        );
+      }
+    } catch {
+      // Silently handle errors
+    }
+  }, [crawlData]);
+
   return (
     <main className="relative flex min-h-screen flex-col bg-crawl-black">
       {/* Starfield background - show on main page and during logo/crawl phases, hide during opening text */}
@@ -228,10 +298,16 @@ function HomeContent() {
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1 className="mb-3 font-logo text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl" style={{ letterSpacing: "0.15em" }}>
+              <h1
+                className="mb-3 font-logo text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl"
+                style={{ letterSpacing: "0.15em" }}
+              >
                 STAR CRAWLER
               </h1>
-              <p className="font-opening-text text-sm text-gray-300 sm:text-base" style={{ letterSpacing: "0.05em" }}>
+              <p
+                className="font-opening-text text-sm text-gray-300 sm:text-base"
+                style={{ letterSpacing: "0.05em" }}
+              >
                 Create and share your own opening crawl
               </p>
             </div>
@@ -244,24 +320,35 @@ function HomeContent() {
             {crawlData && !isPlaying && (
               <div className="mt-6 flex justify-center gap-3">
                 <button
-                  onClick={() => setIsShareModalOpen(true)}
+                  onClick={handleShareUrl}
                   className="inline-flex items-center gap-2 border-2 border-crawl-yellow/40 bg-black/80 px-4 min-[375px]:px-5 py-2.5 font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 active:scale-95 touch-manipulation cursor-pointer min-h-[44px]"
                   style={{
                     letterSpacing: "0.1em",
-                    clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+                    clipPath:
+                      "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
                     touchAction: "manipulation",
                   }}
-                  aria-label="Share"
+                  aria-label={urlCopied ? "URL copied!" : "Share URL"}
                 >
-                  <Share2 className="size-4 shrink-0" />
-                  <span>Share</span>
+                  {urlCopied ? (
+                    <>
+                      <Check className="size-4 shrink-0" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="size-4 shrink-0" />
+                      <span>Share</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleReset}
                   className="inline-flex items-center gap-2 border-2 border-crawl-yellow/40 bg-black/80 px-4 min-[375px]:px-5 py-2.5 font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 active:scale-95 touch-manipulation cursor-pointer min-h-[44px]"
                   style={{
                     letterSpacing: "0.1em",
-                    clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+                    clipPath:
+                      "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
                     touchAction: "manipulation",
                   }}
                 >
@@ -307,17 +394,6 @@ function HomeContent() {
             onControlsVisibilityChange={setControlsVisible}
           />
         )}
-
-        {/* Share Modal */}
-        {crawlData && (
-          <ErrorBoundary>
-            <ShareModal
-              crawlData={crawlData}
-              isOpen={isShareModalOpen}
-              onClose={() => setIsShareModalOpen(false)}
-            />
-          </ErrorBoundary>
-        )}
       </div>
 
       {/* Footer - only show when not playing */}
@@ -328,21 +404,21 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={
-      <main className="relative min-h-screen bg-crawl-black">
-        <Starfield />
-        <div className="relative z-20 flex min-h-screen flex-col items-center justify-center">
-          <div className="text-center">
-            <h1 className="mb-2 font-logo text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
-              STAR CRAWLER
-            </h1>
-            <p className="text-sm text-gray-200 sm:text-base">
-              Loading...
-            </p>
+    <Suspense
+      fallback={
+        <main className="relative min-h-screen bg-crawl-black">
+          <Starfield />
+          <div className="relative z-20 flex min-h-screen flex-col items-center justify-center">
+            <div className="text-center">
+              <h1 className="mb-2 font-logo text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
+                STAR CRAWLER
+              </h1>
+              <p className="text-sm text-gray-200 sm:text-base">Loading...</p>
+            </div>
           </div>
-        </div>
-      </main>
-    }>
+        </main>
+      }
+    >
       <HomeContent />
     </Suspense>
   );

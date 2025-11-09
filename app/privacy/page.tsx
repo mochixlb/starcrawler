@@ -74,14 +74,11 @@ export default function PrivacyPage() {
       </p>
       <ul>
         <li>
-          <strong>Copy to clipboard:</strong> Lets you copy the shareable link
+          <strong>Copy to clipboard:</strong> Lets you copy the crawl text or
+          shareable URL
         </li>
         <li>
           <strong>Fullscreen:</strong> Lets you watch crawls in fullscreen mode
-        </li>
-        <li>
-          <strong>Share:</strong> Lets you share via your device's built-in
-          sharing
         </li>
       </ul>
       <p>

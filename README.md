@@ -60,7 +60,6 @@ npm run test:ui  # Run tests with UI
 │   │   ├── crawl-input.tsx        # Input form
 │   │   ├── starfield.tsx          # Animated background
 │   │   ├── fade-mask.tsx          # Fade effects
-│   │   ├── share-modal.tsx        # Sharing UI
 │   │   └── slider.tsx             # Custom slider
 │   ├── legal/             # Legal page components
 │   └── ui/                # Reusable UI components
@@ -79,7 +78,7 @@ npm run test:ui  # Run tests with UI
 1. Enter opening text, logo, episode number, subtitle, and crawl text
 2. Click "Play Crawl" to start the animation
 3. Use controls to pause, seek, or toggle fullscreen
-4. Share via URL or social media
+4. Click "Share" to copy the URL to your clipboard
 
 Animation timing, colors, and fonts are centralized in `lib/constants.ts` and `app/globals.css` for easy customization.
 
