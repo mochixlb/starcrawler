@@ -9,6 +9,7 @@ import { CrawlDisplay } from "@/components/crawl/crawl-display";
 import { CrawlControls } from "@/components/crawl/crawl-controls";
 import { ShareModal } from "@/components/crawl/share-modal";
 import { Footer } from "@/components/ui/footer";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import type { CrawlData } from "@/lib/types";
 import { decodeCrawlData, encodeCrawlData } from "@/lib/utils";
 
@@ -271,20 +272,22 @@ function HomeContent() {
             )}
           </div>
         ) : (
-          <CrawlDisplay
-            crawlData={crawlData}
-            isPlaying={isPlaying}
-            isPaused={isPaused}
-            onComplete={handleComplete}
-            onProgressChange={handleProgressChange}
-            seekTo={seekTo}
-            onPause={handlePause}
-            onResume={handleResume}
-            onClose={handleComplete}
-            controlsVisible={controlsVisible}
-            onControlsVisibilityChange={setControlsVisible}
-            onPhaseChange={setCrawlPhase}
-          />
+          <ErrorBoundary>
+            <CrawlDisplay
+              crawlData={crawlData}
+              isPlaying={isPlaying}
+              isPaused={isPaused}
+              onComplete={handleComplete}
+              onProgressChange={handleProgressChange}
+              seekTo={seekTo}
+              onPause={handlePause}
+              onResume={handleResume}
+              onClose={handleComplete}
+              controlsVisible={controlsVisible}
+              onControlsVisibilityChange={setControlsVisible}
+              onPhaseChange={setCrawlPhase}
+            />
+          </ErrorBoundary>
         )}
 
         {/* Controls overlay when crawl is playing */}
@@ -307,11 +310,13 @@ function HomeContent() {
 
         {/* Share Modal */}
         {crawlData && (
-          <ShareModal
-            crawlData={crawlData}
-            isOpen={isShareModalOpen}
-            onClose={() => setIsShareModalOpen(false)}
-          />
+          <ErrorBoundary>
+            <ShareModal
+              crawlData={crawlData}
+              isOpen={isShareModalOpen}
+              onClose={() => setIsShareModalOpen(false)}
+            />
+          </ErrorBoundary>
         )}
       </div>
 
