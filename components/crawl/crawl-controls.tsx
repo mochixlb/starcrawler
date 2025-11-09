@@ -337,22 +337,27 @@ export function CrawlControls({
                 title="Share"
                 icon={<Share2 className="size-5" />}
               />
-              <IconButton
-                onClick={onToggleFullscreen}
-                ariaLabel={
-                  isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
-                }
-                title={
-                  isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"
-                }
-                icon={
-                  isFullscreen ? (
-                    <Minimize className="size-5" />
-                  ) : (
-                    <Maximize className="size-5" />
-                  )
-                }
-              />
+              {/* Hide fullscreen button on mobile since it's already full screen */}
+              <div className="hidden sm:flex">
+                <IconButton
+                  onClick={onToggleFullscreen}
+                  ariaLabel={
+                    isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
+                  }
+                  title={
+                    isFullscreen
+                      ? "Exit fullscreen (F)"
+                      : "Enter fullscreen (F)"
+                  }
+                  icon={
+                    isFullscreen ? (
+                      <Minimize className="size-5" />
+                    ) : (
+                      <Maximize className="size-5" />
+                    )
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
