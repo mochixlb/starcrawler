@@ -139,8 +139,8 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
                 isCrawlOverLimit
                   ? "text-red-500"
                   : isCrawlUnderLimit
-                    ? "text-crawl-yellow/70"
-                    : "text-gray-400"
+                    ? "text-crawl-yellow/80"
+                    : "text-gray-300"
               }`}
             >
               {crawlTextLength} / {FORM_CONSTANTS.MAX_MESSAGE_LENGTH} characters

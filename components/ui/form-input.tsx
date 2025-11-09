@@ -35,7 +35,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            "w-full border-2 bg-black px-4 py-2.5 font-opening-text text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black",
+            "w-full border-2 bg-black px-4 py-2.5 font-opening-text text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black",
             borderColorClass,
             className
           )}

@@ -881,7 +881,7 @@ export function CrawlDisplay({
                 </div>
               )}
 
-              {/* Crawl Text Paragraphs - Justified (like original Star Wars) */}
+              {/* Crawl Text Paragraphs - Justified (like classic opening crawls) */}
               {paragraphs.map((paragraph, index) => (
                 <p
                   key={index}

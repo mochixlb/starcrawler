@@ -8,6 +8,7 @@ import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
 import { CrawlControls } from "@/components/crawl/crawl-controls";
 import { ShareModal } from "@/components/crawl/share-modal";
+import { Footer } from "@/components/ui/footer";
 import type { CrawlData } from "@/lib/types";
 import { decodeCrawlData, encodeCrawlData } from "@/lib/utils";
 
@@ -218,12 +219,12 @@ function HomeContent() {
   };
 
   return (
-    <main className="relative min-h-screen bg-crawl-black">
+    <main className="relative flex min-h-screen flex-col bg-crawl-black">
       {/* Starfield background - show on main page and during logo/crawl phases, hide during opening text */}
       {(!isPlaying || crawlPhase !== "opening-text") && <Starfield />}
 
       {/* Main content */}
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
+      <div className="relative z-20 flex flex-1 flex-col items-center justify-center p-4 sm:p-6">
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
@@ -314,6 +315,9 @@ function HomeContent() {
           />
         )}
       </div>
+
+      {/* Footer - only show when not playing */}
+      {!isPlaying && <Footer />}
     </main>
   );
 }

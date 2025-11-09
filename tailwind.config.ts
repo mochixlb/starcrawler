@@ -50,7 +50,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "crawl-yellow": "#E5B13A", // Original Star Wars yellow: RGB(229, 177, 58)
+        "crawl-yellow": "#E5B13A", // Classic crawl yellow: RGB(229, 177, 58)
         "crawl-black": "#000000",
         "crawl-blue": "#4A90E2",
         "crawl-cyan": "#4BD5EE", // Opening text blue
@@ -61,12 +61,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        crawl: [
-          '"News Gothic Bold"',
-          '"Arial Black"',
-          "Impact",
-          "sans-serif",
-        ],
+        crawl: ['"News Gothic Bold"', '"Arial Black"', "Impact", "sans-serif"],
         "opening-text": [
           '"Franklin Gothic Book"',
           '"Franklin Gothic"',

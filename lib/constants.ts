@@ -17,7 +17,7 @@ export const CRAWL_CONSTANTS = {
   CRAWL_START_POSITION: "100%", // Starting Y position (off-screen at bottom)
   CRAWL_END_POSITION: "-200%", // Ending Y position (off-screen at top, further for fade effect)
   FADE_MASK_HEIGHT: "30%", // Height of fade masks (increased for better fade effect)
-  // Original Star Wars yellow: RGB(229, 177, 58) = #E5B13A
+  // Classic crawl yellow: RGB(229, 177, 58) = #E5B13A
   CRAWL_YELLOW: "#E5B13A",
 } as const;
 

@@ -211,7 +211,7 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
           </h2>
           <Button
             onClick={onClose}
-            className="h-8 w-8 border-0 bg-transparent p-0 text-crawl-yellow/70 hover:bg-crawl-yellow/10 hover:text-crawl-yellow focus-visible:ring-2 focus-visible:ring-crawl-yellow transition-colors"
+            className="h-8 w-8 border-0 bg-transparent p-0 text-crawl-yellow/80 hover:bg-crawl-yellow/10 hover:text-crawl-yellow focus-visible:ring-2 focus-visible:ring-crawl-yellow transition-colors"
             aria-label="Close share modal"
           >
             <X className="size-5" />
@@ -239,7 +239,7 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
               <button
                 key={option.name}
                 onClick={() => handleSocialShare(option)}
-                className="group flex flex-col items-center gap-2 border-2 border-crawl-yellow/20 bg-transparent p-4 text-crawl-yellow/70 transition-all hover:border-crawl-yellow/60 hover:bg-crawl-yellow/5 hover:text-crawl-yellow cursor-pointer focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black"
+                className="group flex flex-col items-center gap-2 border-2 border-crawl-yellow/20 bg-transparent p-4 text-crawl-yellow/80 transition-all hover:border-crawl-yellow/60 hover:bg-crawl-yellow/5 hover:text-crawl-yellow cursor-pointer focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black"
                 style={{
                   clipPath:
                     "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
@@ -262,7 +262,7 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
         {/* URL Copy Section */}
         <div>
           <label
-            className="mb-2 block font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow/70"
+            className="mb-2 block font-crawl text-sm font-bold uppercase tracking-wider text-crawl-yellow/80"
             style={{ letterSpacing: "0.1em" }}
           >
             Link

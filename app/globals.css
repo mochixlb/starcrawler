@@ -46,7 +46,7 @@
   --color-chart-3: hsl(197 37% 24%);
   --color-chart-4: hsl(43 74% 66%);
   --color-chart-5: hsl(27 87% 67%);
-  --color-crawl-yellow: #E5B13A; /* Original Star Wars yellow: RGB(229, 177, 58) */
+  --color-crawl-yellow: #E5B13A; /* Classic crawl yellow: RGB(229, 177, 58) */
   --color-crawl-black: #000000;
   --color-crawl-blue: #4A90E2;
   --color-crawl-cyan: #4BD5EE;
@@ -85,7 +85,7 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --crawl-yellow: #E5B13A; /* Original Star Wars yellow: RGB(229, 177, 58) */
+    --crawl-yellow: #E5B13A; /* Classic crawl yellow: RGB(229, 177, 58) */
     --crawl-black: #000000;
     --crawl-perspective: 400px;
     --crawl-rotation: 25deg;

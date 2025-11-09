@@ -286,7 +286,7 @@ export function CrawlControls({
       style={{ letterSpacing: "0.05em" }}
     >
       <span className="truncate">{formatTime(elapsed)}</span>
-      <span className="text-crawl-yellow/60 shrink-0">/</span>
+      <span className="text-crawl-yellow/75 shrink-0">/</span>
       <span className="truncate">{formatTime(totalTime)}</span>
     </div>
   );
