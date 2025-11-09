@@ -20,7 +20,7 @@ export interface SliderProps {
 /**
  * Slider implementation with intuitive drag behavior
  * - Click/tap on track: immediate seek
- * - Drag thumb: smooth dragging, seek on release
+ * - Drag thumb: smooth dragging with live updates, seek on release
  * - Works seamlessly on mouse and touch
  */
 export function Slider({
@@ -41,16 +41,21 @@ export function Slider({
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  const dragStartRef = useRef<{ x: number; value: number } | null>(null);
+  const [localValue, setLocalValue] = useState<number | null>(null);
+  const localValueRef = useRef<number | null>(null);
 
-  // Clamp value to valid range
-  const clampedValue = Math.max(min, Math.min(max, value));
+  // Use local value during drag for immediate visual feedback, otherwise use prop value
+  const displayValue = localValue !== null ? localValue : value;
+  const clampedValue = Math.max(min, Math.min(max, displayValue));
   const percentage = ((clampedValue - min) / (max - min)) * 100;
 
   // Calculate value from client X position
   const getValueFromX = useCallback(
     (clientX: number): number => {
-      if (!trackRef.current) return clampedValue;
+      if (!trackRef.current) {
+        // Fallback to current display value if track ref not available
+        return localValueRef.current !== null ? localValueRef.current : value;
+      }
 
       const rect = trackRef.current.getBoundingClientRect();
       const x = clientX - rect.left;
@@ -63,70 +68,84 @@ export function Slider({
       }
       return rawValue;
     },
-    [min, max, step, clampedValue]
+    [min, max, step, value]
   );
 
-  // Handle pointer down (mouse or touch)
-  const handlePointerDown = useCallback(
+  // Handle thumb drag start
+  const handleThumbPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
 
       e.preventDefault();
+      e.stopPropagation();
       setIsDragging(true);
       setIsActive(true);
-
-      const clientX = e.clientX;
-      const newValue = getValueFromX(clientX);
-      
-      // Store drag start info
-      dragStartRef.current = { x: clientX, value: newValue };
-      
-      // If clicking on track (not thumb), commit immediately
-      const isClickingTrack = e.target === trackRef.current || 
-                              (trackRef.current?.contains(e.target as Node) && 
-                               e.target !== thumbRef.current);
-      
-      if (isClickingTrack) {
-        onChange(newValue);
-        if (onCommit) {
-          onCommit(newValue);
-        }
-        // Don't start drag for track clicks
-        setIsDragging(false);
-        setIsActive(false);
-        return;
-      }
+      // Initialize local value for visual feedback during drag
+      localValueRef.current = value;
+      setLocalValue(value);
     },
-    [disabled, getValueFromX, onChange, onCommit]
+    [disabled, value]
   );
 
-  // Handle pointer move during drag
+  // Handle track click (immediate seek)
+  const handleTrackClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (disabled || isDragging) return;
+      
+      // Ignore clicks on the thumb (thumb handles its own pointer events)
+      if (thumbRef.current?.contains(e.target as Node)) {
+        return;
+      }
+
+      const newValue = getValueFromX(e.clientX);
+      onChange(newValue);
+      if (onCommit) {
+        onCommit(newValue);
+      }
+    },
+    [disabled, isDragging, getValueFromX, onChange, onCommit]
+  );
+
+  // Handle pointer move and up during drag
   useEffect(() => {
     if (!isDragging) return;
 
     const handlePointerMove = (e: PointerEvent) => {
-      if (!trackRef.current || !dragStartRef.current) return;
+      if (!trackRef.current) return;
 
       e.preventDefault();
       const newValue = getValueFromX(e.clientX);
+      
+      // Update ref immediately for instant visual feedback
+      localValueRef.current = newValue;
+      // Update state synchronously for React to re-render
+      setLocalValue(newValue);
+      // Notify parent of change
       onChange(newValue);
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-      if (!dragStartRef.current) return;
-
       e.preventDefault();
-      const finalValue = getValueFromX(e.clientX);
       
-      // Commit the final value
-      onChange(finalValue);
-      if (onCommit) {
-        onCommit(finalValue);
+      if (trackRef.current) {
+        const finalValue = getValueFromX(e.clientX);
+        // Update ref and state one last time
+        localValueRef.current = finalValue;
+        setLocalValue(finalValue);
+        // Notify parent of change
+        onChange(finalValue);
+        if (onCommit) {
+          onCommit(finalValue);
+        }
       }
 
       setIsDragging(false);
       setIsActive(false);
-      dragStartRef.current = null;
+      // Clear local value after a brief delay to sync with prop value
+      setTimeout(() => {
+        localValueRef.current = null;
+        setLocalValue(null);
+      }, 0);
     };
 
     // Use capture phase to ensure we catch events even if pointer leaves element
@@ -141,30 +160,19 @@ export function Slider({
     };
   }, [isDragging, getValueFromX, onChange, onCommit]);
 
-  // Handle track click
-  const handleTrackClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (disabled || isDragging) return;
-      
-      // Only handle if clicking directly on track, not thumb
-      if (e.target === trackRef.current || 
-          (trackRef.current?.contains(e.target as Node) && e.target !== thumbRef.current)) {
-        const newValue = getValueFromX(e.clientX);
-        onChange(newValue);
-        if (onCommit) {
-          onCommit(newValue);
-        }
-      }
-    },
-    [disabled, isDragging, getValueFromX, onChange, onCommit]
-  );
+  // Sync local value with prop value when not dragging
+  useEffect(() => {
+    if (!isDragging && localValue !== null) {
+      localValueRef.current = null;
+      setLocalValue(null);
+    }
+  }, [isDragging, localValue, value]);
 
   return (
     <div
       ref={trackRef}
       className={`relative flex h-5 w-full touch-none select-none items-center cursor-pointer ${trackClassName} ${className}`}
       onClick={handleTrackClick}
-      onPointerDown={handlePointerDown}
       role="slider"
       aria-label={ariaLabel}
       aria-valuemin={min}
@@ -187,6 +195,8 @@ export function Slider({
           style={{
             width: `${percentage}%`,
             clipPath: "polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))",
+            // Disable transitions during drag for smooth movement
+            transition: isDragging ? "none" : undefined,
           }}
         />
       </div>
@@ -194,15 +204,17 @@ export function Slider({
       {/* Thumb */}
       <div
         ref={thumbRef}
-        className={`absolute block h-5 w-5 border-2 border-crawl-yellow bg-crawl-yellow shadow-md transition-all cursor-pointer touch-manipulation ${
-          isActive ? "scale-110" : "hover:scale-110"
+        className={`absolute block h-5 w-5 border-2 border-crawl-yellow bg-crawl-yellow shadow-md cursor-grab touch-manipulation ${
+          isDragging ? "cursor-grabbing scale-110" : "transition-all hover:scale-110"
         } focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black ${thumbClassName}`}
         style={{
           left: `calc(${percentage}% - 10px)`,
           clipPath: "polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))",
           touchAction: "none",
+          // Disable transitions during drag for smooth movement
+          transition: isDragging ? "none" : undefined,
         }}
-        onPointerDown={handlePointerDown}
+        onPointerDown={handleThumbPointerDown}
         tabIndex={disabled ? -1 : 0}
       />
     </div>
