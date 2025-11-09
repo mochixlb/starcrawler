@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Copy, Check, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { copyToClipboard, encodeCrawlData, isUrlLengthSafe } from "@/lib/utils";
+import { copyToClipboard, encodeCrawlData, isUrlLengthSafe, getBaseUrl } from "@/lib/utils";
 import { UI_CONSTANTS } from "@/lib/constants";
 import type { CrawlData } from "@/lib/types";
 
@@ -141,7 +141,7 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
   const shareUrl = (() => {
     try {
       const encoded = encodeCrawlData(crawlData);
-      const baseUrl = `${window.location.origin}${window.location.pathname}`;
+      const baseUrl = getBaseUrl();
       
       // Validate URL length before creating share URL
       if (!isUrlLengthSafe(baseUrl, encoded)) {

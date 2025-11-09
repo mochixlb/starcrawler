@@ -47,7 +47,7 @@ export const crawlDataSchema = z.object({
 /**
  * Type-safe CrawlData inferred from schema
  */
-export type ValidatedCrawlData = z.infer<typeof crawlDataSchema>;
+type ValidatedCrawlData = z.infer<typeof crawlDataSchema>;
 
 /**
  * Validates complete CrawlData object

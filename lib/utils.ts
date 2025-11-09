@@ -70,6 +70,17 @@ export function decodeCrawlData(encoded: string): CrawlData | null {
 }
 
 /**
+ * Gets the base URL for the current page
+ * Returns empty string if window is not available (SSR)
+ */
+export function getBaseUrl(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
+/**
  * Checks if a URL would exceed browser limits
  * Returns true if URL is safe, false if it would be too long
  */
@@ -79,27 +90,12 @@ export function isUrlLengthSafe(baseUrl: string, encoded: string): boolean {
 }
 
 /**
- * Copies text to clipboard with fallback support
+ * Copies text to clipboard
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } else {
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      textArea.style.top = "-999999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const success = document.execCommand("copy");
-      document.body.removeChild(textArea);
-      return success;
-    }
+    await navigator.clipboard.writeText(text);
+    return true;
   } catch {
     return false;
   }

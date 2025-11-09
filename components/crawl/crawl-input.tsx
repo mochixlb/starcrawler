@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormInput } from "@/components/ui/form-input";
 import { FORM_CONSTANTS, URL_CONSTANTS } from "@/lib/constants";
 import { validateCrawlData } from "@/lib/validation";
-import { encodeCrawlData, isUrlLengthSafe } from "@/lib/utils";
+import { encodeCrawlData, isUrlLengthSafe, getBaseUrl } from "@/lib/utils";
 import type { CrawlInputProps } from "@/lib/types";
 
 const DEFAULT_OPENING_TEXT = "A long time ago in a galaxy far, far away....";
@@ -98,10 +98,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
 
       try {
         const encoded = encodeCrawlData(validation.data);
-        const baseUrl =
-          typeof window !== "undefined"
-            ? window.location.origin + window.location.pathname
-            : "";
+        const baseUrl = getBaseUrl();
         const fullUrl = `${baseUrl}?crawl=${encoded}`;
         const urlLength = fullUrl.length;
 
@@ -148,10 +145,7 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
     // Check URL length before encoding
     try {
       const encoded = encodeCrawlData(validation.data);
-      const baseUrl =
-        typeof window !== "undefined"
-          ? window.location.origin + window.location.pathname
-          : "";
+      const baseUrl = getBaseUrl();
 
       if (!isUrlLengthSafe(baseUrl, encoded)) {
         const fullUrl = `${baseUrl}?crawl=${encoded}`;
