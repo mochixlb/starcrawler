@@ -1,6 +1,6 @@
 # Star Crawler
 
-A free, open-source web app for creating and sharing cinematic opening crawl animations. Transform your text into a scrolling space epic with customizable episode numbers, subtitles, and crawl text.
+A free, open-source web app for creating and sharing cinematic Star Wars-style opening crawl animations.
 
 ## Quick Start
 
@@ -13,22 +13,21 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 
 ## Features
 
-- **Cinematic Animation**: Three-phase sequence (opening text → logo → scrolling crawl) with animated starfield background
-- **Custom Fonts**: Star Jedi font (regular for titles, hollow for logo animation)
-- **Playback Controls**: Play/pause, seek slider, and fullscreen mode with YouTube-style controls
-- **Keyboard Shortcuts**: Space (pause/resume), Arrow keys (seek ±5s), F (fullscreen), Escape (stop)
-- **Sharing**: Share modal with social media options and URL copy (no database required)
-- **URL-Based State**: Shareable links with URL-encoded crawl data
+- **Three-phase animation**: Opening text → logo → scrolling crawl with animated starfield background
+- **Custom fonts**: Star Jedi font (regular for titles, hollow for logo)
+- **Playback controls**: Play/pause, seek slider, and fullscreen mode
+- **Keyboard shortcuts**: Space (pause/resume), Arrow keys (seek ±5s), F (fullscreen), Escape (stop)
+- **URL-based sharing**: Shareable links with encoded crawl data (no database required)
 - **Accessibility**: Respects `prefers-reduced-motion` preferences
-- **Responsive**: Optimized for desktop and mobile with touch-friendly controls
+- **Responsive**: Optimized for desktop and mobile
 
 ## Tech Stack
 
 - **Next.js 16** (App Router) + **React 19**
 - **TypeScript**
-- **Tailwind CSS 4** (CSS-first configuration)
+- **Tailwind CSS 4**
 - **Framer Motion** (animations)
-- **Radix UI** (accessible components)
+- **Zod** (validation)
 - **Lucide React** (icons)
 
 ## Project Structure
@@ -62,10 +61,10 @@ Open [http://localhost:3000](http://localhost:3000) to start creating.
 
 ## How It Works
 
-1. Enter your opening text, logo, episode number, subtitle, and crawl text
-2. Click "Play Crawl" to start the three-phase animation
+1. Enter opening text, logo, episode number, subtitle, and crawl text
+2. Click "Play Crawl" to start the animation
 3. Use controls to pause, seek, or toggle fullscreen
-4. Share via URL or social media platforms
+4. Share via URL or social media
 
 Animation timing, colors, and fonts are centralized in `lib/constants.ts` and `app/globals.css` for easy customization.
 
