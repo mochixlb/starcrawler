@@ -216,8 +216,8 @@ export function CrawlControls({
     }
     // Don't set timeout during drag - wait for commit
 
-    // Update progress during drag (visual feedback)
-    // The actual seek will happen on commit
+    // Seek in real-time during drag for live preview
+    onSeek(newProgress);
     pendingSeekRef.current = newProgress;
   };
 
