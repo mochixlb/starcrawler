@@ -35,6 +35,7 @@ function HomeContent() {
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [crawlPhase, setCrawlPhase] = useState<"opening-text" | "logo" | "crawl">("opening-text");
   const isFormSubmittingRef = useRef(false);
 
   // Update crawl data when URL changes (only for external/shared links)
@@ -94,6 +95,7 @@ function HomeContent() {
   const handleComplete = () => {
     setIsPlaying(false);
     setIsPaused(false);
+    setCrawlPhase("opening-text");
   };
 
   // Handle pause/resume
@@ -210,14 +212,15 @@ function HomeContent() {
     setRemaining(0);
     setIsFullscreen(false);
     setSeekTo(undefined);
+    setCrawlPhase("opening-text");
     // Clear URL params
     router.replace("/", { scroll: false });
   };
 
   return (
     <main className="relative min-h-screen bg-crawl-black">
-      {/* Starfield background */}
-      <Starfield />
+      {/* Starfield background - only show during logo and crawl phases */}
+      {crawlPhase !== "opening-text" && <Starfield />}
 
       {/* Main content */}
       <div className="relative z-20 flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
@@ -280,6 +283,7 @@ function HomeContent() {
             onClose={handleComplete}
             controlsVisible={controlsVisible}
             onControlsVisibilityChange={setControlsVisible}
+            onPhaseChange={setCrawlPhase}
           />
         )}
 

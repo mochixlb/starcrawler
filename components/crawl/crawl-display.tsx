@@ -22,9 +22,15 @@ export function CrawlDisplay({
   onClose,
   controlsVisible = false,
   onControlsVisibilityChange,
+  onPhaseChange,
 }: CrawlDisplayProps) {
   const controls = useAnimation();
   const [phase, setPhase] = useState<AnimationPhase>("opening-text");
+
+  // Notify parent of phase changes
+  useEffect(() => {
+    onPhaseChange?.(phase);
+  }, [phase, onPhaseChange]);
   const [isComplete, setIsComplete] = useState(false);
   const [crawlStarted, setCrawlStarted] = useState(false);
   const animationStartedRef = useRef(false);
@@ -758,14 +764,14 @@ export function CrawlDisplay({
       {/* Opening Text - Blue static text */}
       {phase === "opening-text" && (
         <motion.div
-          className="absolute inset-0 z-20 flex items-center justify-center"
+          className="absolute inset-0 z-20 flex items-center justify-start md:justify-center px-4 md:px-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
           <p
-            className="font-opening-text text-center text-3xl md:text-4xl lg:text-5xl"
+            className="font-opening-text text-left md:text-center text-3xl md:text-4xl lg:text-5xl"
             style={{
               color: CRAWL_CONSTANTS.OPENING_TEXT_COLOR,
               letterSpacing: "0.15em",
@@ -826,7 +832,7 @@ export function CrawlDisplay({
           }}
         >
           <motion.div
-            className="w-full max-w-4xl px-4 sm:px-6 md:px-8 text-center"
+            className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
             animate={{
               ...controls,
               opacity: crawlOpacity,
@@ -834,6 +840,7 @@ export function CrawlDisplay({
             initial={{ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 }}
             style={{
               willChange: "transform, opacity",
+              maxWidth: "min(90vw, 1200px)", // Wider on large screens, responsive on mobile
             }}
           >
             <div
@@ -842,10 +849,9 @@ export function CrawlDisplay({
                 fontSize: CRAWL_CONSTANTS.FONT_SIZE_BASE,
                 lineHeight: CRAWL_CONSTANTS.LINE_HEIGHT,
                 letterSpacing: CRAWL_CONSTANTS.LETTER_SPACING,
-                textAlign: "center",
               }}
             >
-              {/* Episode Number */}
+              {/* Episode Number - Centered */}
               {crawlData.episodeNumber && (
                 <div
                   style={{
@@ -853,13 +859,14 @@ export function CrawlDisplay({
                     marginBottom: CRAWL_CONSTANTS.PARAGRAPH_SPACING,
                     textTransform: "uppercase",
                     fontWeight: 700,
+                    textAlign: "center",
                   }}
                 >
                   EPISODE {crawlData.episodeNumber}
                 </div>
               )}
 
-              {/* Episode Subtitle */}
+              {/* Episode Subtitle - Centered */}
               {crawlData.episodeSubtitle && (
                 <div
                   style={{
@@ -867,18 +874,24 @@ export function CrawlDisplay({
                     marginBottom: CRAWL_CONSTANTS.PARAGRAPH_SPACING,
                     textTransform: "uppercase",
                     fontWeight: 700,
+                    textAlign: "center",
                   }}
                 >
                   {crawlData.episodeSubtitle}
                 </div>
               )}
 
-              {/* Crawl Text Paragraphs */}
+              {/* Crawl Text Paragraphs - Justified (like original Star Wars) */}
               {paragraphs.map((paragraph, index) => (
                 <p
                   key={index}
                   style={{
                     marginBottom: CRAWL_CONSTANTS.PARAGRAPH_SPACING,
+                    textAlign: "justify",
+                    textAlignLast: "left", // Last line left-aligned (matches original)
+                    hyphens: "auto", // Enable hyphenation for better justification
+                    WebkitHyphens: "auto",
+                    msHyphens: "auto",
                   }}
                 >
                   {paragraph.trim()}

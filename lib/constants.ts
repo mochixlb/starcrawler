@@ -3,18 +3,22 @@ export const CRAWL_CONSTANTS = {
   PERSPECTIVE: "400px",
   ROTATION: 25, // degrees
   DURATION: 45, // seconds
-  FONT_SIZE_BASE: "clamp(1rem, 4vw, 2.5rem)", // Responsive: 16px on mobile, scales up to 40px
-  FONT_SIZE_TITLE: "clamp(1.5rem, 5vw, 3.5rem)", // Responsive: 24px on mobile, scales up to 56px
-  FONT_SIZE_EPISODE: "clamp(0.875rem, 3vw, 2rem)", // Responsive: 14px on mobile, scales up to 32px
-  LINE_HEIGHT: 1.7,
-  LETTER_SPACING: "0.05em",
-  PARAGRAPH_SPACING: "clamp(1.5rem, 4vw, 3rem)", // Responsive spacing for mobile
+  // Font sizes optimized for readability across all screen sizes
+  // Mobile: smaller base, Desktop: larger for cinematic effect
+  FONT_SIZE_BASE: "clamp(0.875rem, 3.5vw + 0.5rem, 2rem)", // Responsive: 14px mobile → 32px desktop
+  FONT_SIZE_TITLE: "clamp(1.25rem, 4.5vw + 0.75rem, 2.75rem)", // Responsive: 20px mobile → 44px desktop
+  FONT_SIZE_EPISODE: "clamp(0.75rem, 2.5vw + 0.5rem, 1.5rem)", // Responsive: 12px mobile → 24px desktop
+  LINE_HEIGHT: 1.6, // Slightly tighter for better readability (original uses ~1.6)
+  LETTER_SPACING: "0.06em", // Slightly increased for better readability
+  PARAGRAPH_SPACING: "clamp(1.25rem, 3vw + 0.5rem, 2.5rem)", // Responsive spacing
   OPENING_TEXT_COLOR: "#4BD5EE", // Cyan blue for "A long time ago..."
   LOGO_ANIMATION_DURATION: 8, // seconds for logo shrink/recede (matches original timing)
   OPENING_TEXT_DURATION: 6, // seconds to display opening text (matches original timing)
   CRAWL_START_POSITION: "100%", // Starting Y position (off-screen at bottom)
   CRAWL_END_POSITION: "-200%", // Ending Y position (off-screen at top, further for fade effect)
   FADE_MASK_HEIGHT: "30%", // Height of fade masks (increased for better fade effect)
+  // Original Star Wars yellow: RGB(229, 177, 58) = #E5B13A
+  CRAWL_YELLOW: "#E5B13A",
 } as const;
 
 // Starfield constants

@@ -28,4 +28,5 @@ export interface CrawlDisplayProps {
   onClose?: () => void;
   controlsVisible?: boolean;
   onControlsVisibilityChange?: (visible: boolean) => void;
+  onPhaseChange?: (phase: "opening-text" | "logo" | "crawl") => void;
 }
