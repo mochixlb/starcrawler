@@ -83,7 +83,9 @@ export default function TermsPage() {
 
       <h2>Links to Other Sites</h2>
       <p>
-        When you share crawls on social media, you're using other websites. We're not responsible for those sites or their policies.
+        The "Share" button copies the crawl URL to your clipboard. If you share it
+        elsewhere, you're using those services. We're not responsible for other sites
+        or their policies.
       </p>
 
       <h2>If Something Goes Wrong</h2>

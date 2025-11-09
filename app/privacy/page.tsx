@@ -110,9 +110,8 @@ export default function PrivacyPage() {
 
       <h2>Sharing Your Crawls</h2>
       <p>
-        When you share a crawl link on social media (Twitter, Facebook, etc.),
-        you're using those platforms' services. We're not responsible for how
-        those platforms handle your data—that's between you and them.
+        The "Share" button copies the crawl URL to your clipboard. You can paste
+        and share it anywhere you choose.
       </p>
 
       <h2>Your Privacy Rights</h2>

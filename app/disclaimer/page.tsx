@@ -119,9 +119,9 @@ export default function DisclaimerPage() {
 
       <h2>Third-Party Services</h2>
       <p>
-        When you share crawls on social media or other platforms, you're using
-        their services. We're not responsible for those platforms or their
-        policies.
+        The "Share" button copies the crawl URL to your clipboard. If you share
+        it elsewhere, you're using those services. We're not responsible for
+        other platforms or their policies.
       </p>
 
       <h2>We're Not Liable</h2>
