@@ -11,7 +11,9 @@ interface LegalLayoutProps {
 export function LegalLayout({ children, title }: LegalLayoutProps) {
   return (
     <main className="relative min-h-screen bg-crawl-black">
-      <Starfield />
+      <div className="hidden md:block">
+        <Starfield />
+      </div>
       
       <div className="relative z-20 min-h-screen">
         {/* Header */}
