@@ -30,12 +30,13 @@ function generateCSP(): string {
   // Environment-specific script and style directives
   if (isProduction) {
     // Production: Strict CSP
+    // - 'strict-dynamic': Required for Next.js 16 dynamic script loading and code splitting
+    //   Allows scripts loaded by trusted scripts (from 'self') to execute
     // - No unsafe-eval: Framer Motion doesn't require eval() in production builds
-    // - No unsafe-inline for scripts: Next.js bundles all scripts, no inline scripts needed
     // - unsafe-inline for styles: Required for Tailwind CSS 4 dynamic classes and Framer Motion inline styles
     return [
       ...baseDirectives,
-      "script-src 'self'", // Only allow scripts from same origin (Next.js bundles everything)
+      "script-src 'self' 'strict-dynamic'", // Next.js 16 requires strict-dynamic for dynamic imports
       "style-src 'self' 'unsafe-inline'", // Required for Tailwind CSS 4 and Framer Motion
     ].join("; ");
   } else {
