@@ -20,7 +20,7 @@ export function CrawlDisplay({
   onPause,
   onResume,
   onClose,
-  controlsVisible = true,
+  controlsVisible = false,
   onControlsVisibilityChange,
 }: CrawlDisplayProps) {
   const controls = useAnimation();

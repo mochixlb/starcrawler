@@ -34,7 +34,7 @@ function HomeContent() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(false);
   const isFormSubmittingRef = useRef(false);
 
   // Update crawl data when URL changes (only for external/shared links)

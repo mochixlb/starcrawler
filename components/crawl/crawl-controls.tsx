@@ -132,9 +132,9 @@ export function CrawlControls({
 }: CrawlControlsProps) {
   const { copied: copiedText, showFeedback: showTextFeedback } =
     useCopyFeedback();
-  const [internalVisible, setInternalVisible] = useState(true);
+  const [internalVisible, setInternalVisible] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [showCenterButton, setShowCenterButton] = useState(true);
+  const [showCenterButton, setShowCenterButton] = useState(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
   const centerButtonDelayRef = useRef<NodeJS.Timeout | null>(null);
