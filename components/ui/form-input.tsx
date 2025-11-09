@@ -5,17 +5,20 @@ export interface FormInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   labelColor?: "cyan" | "yellow";
+  error?: boolean;
+  errorMessage?: string;
 }
 
 const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
-  ({ label, labelColor = "yellow", className, id, ...props }, ref) => {
+  ({ label, labelColor = "yellow", className, id, error, errorMessage, ...props }, ref) => {
     const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
     const labelColorClass =
       labelColor === "cyan"
         ? "text-crawl-cyan"
         : "text-crawl-yellow";
-    const borderColorClass =
-      labelColor === "cyan"
+    const borderColorClass = error
+      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/50"
+      : labelColor === "cyan"
         ? "border-crawl-cyan/30 focus:border-crawl-cyan focus:ring-crawl-cyan/50"
         : "border-crawl-yellow/30 focus:border-crawl-yellow focus:ring-crawl-yellow/50";
 
@@ -35,15 +38,27 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            "w-full border-2 bg-black px-4 py-2.5 font-opening-text text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black",
+            "w-full border-2 bg-black px-4 py-2.5 font-opening-text text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black transition-colors",
             borderColorClass,
             className
           )}
           style={{
             clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
           }}
+          aria-invalid={error}
+          aria-describedby={error && errorMessage ? `${inputId}-error` : undefined}
           {...props}
         />
+        {error && errorMessage && (
+          <p
+            id={`${inputId}-error`}
+            className="font-opening-text text-[10px] text-red-400 sm:text-xs"
+            role="alert"
+            aria-live="polite"
+          >
+            {errorMessage}
+          </p>
+        )}
       </div>
     );
   }

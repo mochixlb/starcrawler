@@ -135,8 +135,7 @@ function HomeContent() {
   const handleToggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {
-        // Fallback for browsers that don't support fullscreen
-        console.warn("Fullscreen not supported");
+        // Silently handle browsers that don't support fullscreen
       });
     } else {
       document.exitFullscreen();

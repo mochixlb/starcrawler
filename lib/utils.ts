@@ -1,6 +1,9 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { fromString, toString } from "@hexagon/base64";
 import type { CrawlData } from "./types";
+import { validateCrawlData } from "./validation";
+import { URL_CONSTANTS } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,39 +12,70 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Encodes crawl data to a URL-safe base64 string
  * Uses base64url encoding (URL-safe variant of base64)
+ * Validates data before encoding
  */
 export function encodeCrawlData(data: CrawlData): string {
+  // Validate data before encoding
+  const validation = validateCrawlData(data);
+  if (!validation.success) {
+    throw new Error(validation.error);
+  }
+
   try {
-    const json = JSON.stringify(data);
-    // Convert to base64url (URL-safe base64)
-    const base64 = btoa(unescape(encodeURIComponent(json)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
-    return base64;
+    const json = JSON.stringify(validation.data);
+    // Encode to base64url using RFC 4648 compliant library
+    const encoded = fromString(json, true);
+
+    // Check encoded length
+    if (encoded.length > URL_CONSTANTS.MAX_ENCODED_LENGTH) {
+      throw new Error(
+        `Encoded data exceeds maximum length of ${URL_CONSTANTS.MAX_ENCODED_LENGTH} bytes`
+      );
+    }
+
+    return encoded;
   } catch (error) {
-    console.error("Failed to encode crawl data:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Failed to encode crawl data");
   }
 }
 
 /**
  * Decodes a URL-safe base64 string back to crawl data
+ * Validates structure, size, and content using Zod schema
  */
 export function decodeCrawlData(encoded: string): CrawlData | null {
-  try {
-    // Convert base64url back to standard base64
-    let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
-    // Add padding if needed
-    while (base64.length % 4) {
-      base64 += "=";
-    }
-    const json = decodeURIComponent(escape(atob(base64)));
-    return JSON.parse(json) as CrawlData;
-  } catch (error) {
-    console.error("Failed to decode crawl data:", error);
+  // Check encoded parameter length
+  if (encoded.length > URL_CONSTANTS.MAX_ENCODED_LENGTH) {
     return null;
   }
+
+  try {
+    // Decode base64url using RFC 4648 compliant library
+    const json = toString(encoded, true);
+    const parsed = JSON.parse(json);
+
+    // Validate structure and content using Zod schema
+    const validation = validateCrawlData(parsed);
+    if (!validation.success) {
+      return null;
+    }
+
+    return validation.data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Checks if a URL would exceed browser limits
+ * Returns true if URL is safe, false if it would be too long
+ */
+export function isUrlLengthSafe(baseUrl: string, encoded: string): boolean {
+  const fullUrl = `${baseUrl}?crawl=${encoded}`;
+  return fullUrl.length <= URL_CONSTANTS.MAX_URL_LENGTH;
 }
 
 /**
@@ -66,8 +100,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       document.body.removeChild(textArea);
       return success;
     }
-  } catch (error) {
-    console.error("Failed to copy to clipboard:", error);
+  } catch {
     return false;
   }
 }

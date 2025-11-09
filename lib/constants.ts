@@ -32,6 +32,16 @@ export const STARFIELD_CONSTANTS = {
 export const FORM_CONSTANTS = {
   MIN_MESSAGE_LENGTH: 10,
   MAX_MESSAGE_LENGTH: 2000,
+  MAX_OPENING_TEXT_LENGTH: 200,
+  MAX_LOGO_TEXT_LENGTH: 50,
+  MAX_EPISODE_NUMBER_LENGTH: 20,
+  MAX_EPISODE_SUBTITLE_LENGTH: 100,
+} as const;
+
+// URL validation constants
+export const URL_CONSTANTS = {
+  MAX_ENCODED_LENGTH: 10 * 1024, // 10KB max encoded parameter length
+  MAX_URL_LENGTH: 2000, // Browser URL limit (conservative)
 } as const;
 
 // UI constants

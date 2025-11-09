@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Copy, Check, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { copyToClipboard, encodeCrawlData } from "@/lib/utils";
+import { copyToClipboard, encodeCrawlData, isUrlLengthSafe } from "@/lib/utils";
 import { UI_CONSTANTS } from "@/lib/constants";
 import type { CrawlData } from "@/lib/types";
 
@@ -139,12 +139,23 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
   }, [isOpen]);
 
   const shareUrl = (() => {
-    const encoded = encodeCrawlData(crawlData);
-    return `${window.location.origin}${window.location.pathname}?crawl=${encoded}`;
+    try {
+      const encoded = encodeCrawlData(crawlData);
+      const baseUrl = `${window.location.origin}${window.location.pathname}`;
+      
+      // Validate URL length before creating share URL
+      if (!isUrlLengthSafe(baseUrl, encoded)) {
+        return null;
+      }
+      
+      return `${baseUrl}?crawl=${encoded}`;
+    } catch {
+      return null;
+    }
   })();
 
   const handleWebShare = async () => {
-    if (!canUseWebShare) return;
+    if (!canUseWebShare || !shareUrl) return;
 
     const shareData = {
       title: "Star Crawl",
@@ -160,20 +171,19 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
     try {
       await navigator.share(shareData);
       onClose();
-    } catch (error) {
-      // User cancelled or error occurred - only log non-user cancellations
-      if ((error as Error).name !== "AbortError") {
-        console.error("Error sharing:", error);
-      }
+    } catch {
+      // User cancelled or error occurred - silently handle
     }
   };
 
   const handleSocialShare = (option: ShareOption) => {
+    if (!shareUrl) return;
     const url = option.url(shareUrl);
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleCopyUrl = async () => {
+    if (!shareUrl) return;
     const success = await copyToClipboard(shareUrl);
     if (success) {
       setCopied(true);
@@ -182,6 +192,48 @@ export function ShareModal({ crawlData, isOpen, onClose }: ShareModalProps) {
   };
 
   if (!isOpen) return null;
+
+  // Don't render if URL generation failed
+  if (!shareUrl) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
+      >
+        <div
+          className="relative w-full max-w-lg border-2 border-red-500/40 bg-black/95 p-8 shadow-xl backdrop-blur-md"
+          style={{
+            clipPath:
+              "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-8 flex items-center justify-between border-b border-red-500/20 pb-4">
+            <h2
+              id="share-modal-title"
+              className="font-crawl text-2xl font-bold uppercase tracking-wider text-red-500"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Error
+            </h2>
+            <Button
+              onClick={onClose}
+              className="h-8 w-8 border-0 bg-transparent p-0 text-red-500/80 hover:bg-red-500/10 hover:text-red-500 focus-visible:ring-2 focus-visible:ring-red-500 transition-colors"
+              aria-label="Close share modal"
+            >
+              <X className="size-5" />
+            </Button>
+          </div>
+          <p className="text-gray-300 leading-relaxed">
+            Unable to generate share URL. The crawl content may be too long. Please reduce the text length and try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
