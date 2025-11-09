@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import {
   Play,
@@ -59,7 +59,7 @@ function useCopyFeedback() {
 
 // Common button styles
 const iconButtonClass =
-  "h-11 w-11 min-[768px]:h-9 min-[768px]:w-9 border-0 bg-transparent p-0 text-crawl-yellow hover:bg-crawl-yellow/10 focus-visible:ring-2 focus-visible:ring-crawl-yellow touch-manipulation";
+  "h-11 w-11 min-[768px]:h-9 min-[768px]:w-9 border-0 bg-transparent p-0 text-crawl-yellow hover:bg-crawl-yellow/10 focus-visible:ring-2 focus-visible:ring-crawl-yellow touch-manipulation cursor-pointer";
 const iconSizeClass = "size-5 min-[768px]:size-4";
 
 // Icon button component
@@ -109,21 +109,20 @@ function CopyButton({ onClick, copied, label, icon, title }: CopyButtonProps) {
   return (
     <Button
       onClick={onClick}
-      className="h-11 min-[768px]:h-9 min-w-11 min-[768px]:w-18 border-0 bg-transparent px-1.5 min-[768px]:px-2 py-0 text-[10px] min-[768px]:text-xs font-medium text-crawl-yellow hover:bg-crawl-yellow/10 focus-visible:ring-2 focus-visible:ring-crawl-yellow touch-manipulation overflow-hidden"
+      className="h-11 min-[768px]:h-9 min-w-14 min-[375px]:min-w-16 min-[768px]:min-w-18 border-0 bg-transparent px-2.5 min-[375px]:px-3 min-[768px]:px-2 py-0 text-[11px] min-[375px]:text-xs min-[768px]:text-xs font-medium text-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 focus-visible:ring-2 focus-visible:ring-crawl-yellow touch-manipulation overflow-hidden transition-colors"
       aria-label={copied ? `${label} copied!` : `Copy ${label.toLowerCase()}`}
       title={title}
     >
-      <span className="inline-flex items-center justify-center whitespace-nowrap">
+      <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
         {copied ? (
           <>
-            <Check className="mr-0.5 min-[768px]:mr-1 size-3 shrink-0" />
-            <span className="hidden min-[360px]:inline truncate">Copied!</span>
-            <span className="min-[360px]:hidden">✓</span>
+            <Check className="size-3.5 min-[768px]:size-3 shrink-0" />
+            <span className="truncate">Copied!</span>
           </>
         ) : (
           <>
-            {icon}
-            <span className="hidden min-[360px]:inline truncate">{label}</span>
+            <span className="shrink-0">{icon}</span>
+            <span className="truncate">{label}</span>
           </>
         )}
       </span>
@@ -140,7 +139,7 @@ interface SpeedButtonProps {
 
 function SpeedButton({ option, isActive, onClick }: SpeedButtonProps) {
   const baseClass =
-    "min-w-[2.5rem] px-2 py-1 text-[11px] font-semibold transition-all first:rounded-l last:rounded-r focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black whitespace-nowrap overflow-hidden";
+    "min-w-[2.5rem] px-2 py-1 text-[11px] font-semibold transition-all first:rounded-l last:rounded-r focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black whitespace-nowrap overflow-hidden cursor-pointer";
   const activeClass = "bg-crawl-yellow text-black shadow-md";
   const inactiveClass =
     "text-crawl-yellow/60 hover:bg-crawl-yellow/10 hover:text-crawl-yellow";
@@ -161,7 +160,7 @@ function SpeedButton({ option, isActive, onClick }: SpeedButtonProps) {
 // Mobile speed button component
 function MobileSpeedButton({ option, isActive, onClick }: SpeedButtonProps) {
   const baseClass =
-    "h-11 w-full px-0.5 py-0 text-[9px] min-[360px]:text-[10px] font-semibold transition-all rounded focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black touch-manipulation flex items-center justify-center whitespace-nowrap overflow-hidden";
+    "h-11 w-full px-0.5 py-0 text-[9px] min-[360px]:text-[10px] font-semibold transition-all rounded focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black touch-manipulation flex items-center justify-center whitespace-nowrap overflow-hidden cursor-pointer";
   const activeClass = "bg-crawl-yellow text-black shadow-md scale-[1.02]";
   const inactiveClass =
     "text-crawl-yellow/60 active:bg-crawl-yellow/10 active:scale-[0.98]";
@@ -201,6 +200,8 @@ export function CrawlControls({
     useCopyFeedback();
   const { copied: copiedText, showFeedback: showTextFeedback } =
     useCopyFeedback();
+  const isDraggingRef = useRef(false);
+  const pendingSeekRef = useRef<number | null>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -228,7 +229,60 @@ export function CrawlControls({
 
   const handleSliderChange = (values: number[]) => {
     const newProgress = values[0] ?? 0;
-    onSeek(newProgress);
+    // Store the pending seek value
+    pendingSeekRef.current = newProgress;
+
+    // If not dragging, seek immediately (e.g., keyboard navigation)
+    if (!isDraggingRef.current) {
+      onSeek(newProgress);
+      pendingSeekRef.current = null;
+    }
+    // While dragging, we'll seek on drag end via handleSliderValueCommit or handleSliderMouseUp
+  };
+
+  const handleSliderValueCommit = (values: number[]) => {
+    // This fires when user releases the slider after dragging (mouse up / touch end)
+    // Note: This may not fire on simple clicks, so handleSliderMouseUp handles those cases
+    const finalProgress = values[0] ?? 0;
+
+    // Seek to the final value
+    onSeek(finalProgress);
+    // Clear pending seek to avoid double-seeking in handleSliderMouseUp
+    pendingSeekRef.current = null;
+    isDraggingRef.current = false;
+  };
+
+  // Track drag state
+  const handleSliderMouseDown = () => {
+    isDraggingRef.current = true;
+  };
+
+  const handleSliderMouseUp = () => {
+    if (isDraggingRef.current) {
+      if (pendingSeekRef.current !== null) {
+        // Seek to the pending value (whether click or drag)
+        onSeek(pendingSeekRef.current);
+        pendingSeekRef.current = null;
+      }
+    }
+
+    isDraggingRef.current = false;
+  };
+
+  const handleSliderTouchStart = () => {
+    isDraggingRef.current = true;
+  };
+
+  const handleSliderTouchEnd = () => {
+    if (isDraggingRef.current) {
+      if (pendingSeekRef.current !== null) {
+        // Seek to the pending value (whether tap or drag)
+        onSeek(pendingSeekRef.current);
+        pendingSeekRef.current = null;
+      }
+    }
+
+    isDraggingRef.current = false;
   };
 
   const totalTime = elapsed + remaining;
@@ -245,19 +299,25 @@ export function CrawlControls({
       {/* Progress Bar */}
       <div className="mb-2 min-[768px]:mb-3">
         <Slider.Root
-          className="relative flex h-8 min-[768px]:h-5 w-full touch-none select-none items-center"
+          className="relative flex h-8 min-[768px]:h-5 w-full touch-none select-none items-center cursor-pointer"
           value={[progress]}
           onValueChange={handleSliderChange}
+          onValueCommit={handleSliderValueCommit}
+          onMouseDown={handleSliderMouseDown}
+          onMouseUp={handleSliderMouseUp}
+          onMouseLeave={handleSliderMouseUp}
+          onTouchStart={handleSliderTouchStart}
+          onTouchEnd={handleSliderTouchEnd}
           min={0}
           max={1}
           step={0.001}
           aria-label="Crawl progress"
         >
-          <Slider.Track className="relative h-2.5 min-[768px]:h-2 w-full grow rounded-full bg-crawl-yellow/20">
+          <Slider.Track className="relative h-2.5 min-[768px]:h-2 w-full grow rounded-full bg-crawl-yellow/20 cursor-pointer">
             <Slider.Range className="absolute h-full rounded-full bg-crawl-yellow" />
           </Slider.Track>
           <Slider.Thumb
-            className="block h-6 w-6 min-[768px]:h-3 min-[768px]:w-3 rounded-full bg-crawl-yellow shadow-md transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black touch-manipulation"
+            className="block h-6 w-6 min-[768px]:h-3 min-[768px]:w-3 rounded-full bg-crawl-yellow shadow-md transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-crawl-yellow focus:ring-offset-2 focus:ring-offset-black touch-manipulation cursor-pointer"
             aria-label="Crawl progress slider"
           />
         </Slider.Root>
@@ -350,7 +410,7 @@ export function CrawlControls({
 
         {/* Settings and Share */}
         <div
-          className="flex items-center gap-1.5 min-[768px]:gap-1 shrink-0"
+          className="flex items-center gap-2 min-[375px]:gap-2.5 min-[768px]:gap-1 shrink-0"
           role="group"
           aria-label="Settings controls"
         >
@@ -385,7 +445,7 @@ export function CrawlControls({
           />
 
           <div
-            className="h-8 min-[768px]:h-6 w-px bg-crawl-yellow/30"
+            className="h-8 min-[768px]:h-6 w-px bg-crawl-yellow/30 mx-0.5 min-[768px]:mx-0"
             aria-hidden="true"
           />
 
@@ -393,7 +453,7 @@ export function CrawlControls({
             onClick={handleCopyText}
             copied={copiedText}
             label="Copy"
-            icon={<Copy className="mr-0.5 min-[768px]:mr-1 size-3 shrink-0" />}
+            icon={<Copy className="size-3.5 min-[768px]:size-3 shrink-0" />}
             title="Copy text"
           />
 
@@ -401,9 +461,7 @@ export function CrawlControls({
             onClick={handleShare}
             copied={copiedLink}
             label="Share"
-            icon={
-              <Share2 className="mr-0.5 min-[768px]:mr-1 size-3 shrink-0" />
-            }
+            icon={<Share2 className="size-3.5 min-[768px]:size-3 shrink-0" />}
             title="Share"
           />
         </div>

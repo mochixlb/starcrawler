@@ -130,8 +130,11 @@ function HomeContent() {
   // Handle seeking
   const handleSeek = useCallback((newProgress: number) => {
     setSeekTo(newProgress);
-    // Clear seekTo after a brief moment to allow re-seeking
-    setTimeout(() => setSeekTo(undefined), 100);
+    // Clear seekTo after a longer delay to ensure it's processed
+    // Use a ref to track timeout and clear previous ones
+    setTimeout(() => {
+      setSeekTo(undefined);
+    }, 200);
   }, []);
 
   // Handle loop toggle
@@ -256,10 +259,10 @@ function HomeContent() {
                 <ShareButton crawlData={crawlData} />
                 <button
                   onClick={handleReset}
-                  className="inline-flex items-center gap-2 rounded-md border border-crawl-yellow/50 px-5 py-2.5 text-sm font-medium text-crawl-yellow transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10"
+                  className="inline-flex items-center gap-2 rounded-md border border-crawl-yellow/50 bg-black/80 px-4 min-[375px]:px-5 py-2.5 text-sm font-medium text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10 active:bg-crawl-yellow/20 touch-manipulation cursor-pointer"
                 >
-                  <RotateCcw className="size-4" />
-                  Reset
+                  <RotateCcw className="size-4 shrink-0" />
+                  <span>Reset</span>
                 </button>
               </div>
             )}

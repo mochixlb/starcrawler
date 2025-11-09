@@ -27,6 +27,9 @@ export function CrawlDisplay({
   const startTimeRef = useRef<number | null>(null);
   const totalPausedTimeRef = useRef(0);
   const pauseStartTimeRef = useRef<number | null>(null);
+  const previousSpeedRef = useRef(speed);
+  const isChangingSpeedRef = useRef(false);
+  const speedChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for reduced motion preference
   const shouldReduceMotion =
@@ -87,9 +90,27 @@ export function CrawlDisplay({
     }
   }, [isPaused, phase, crawlStarted, controls, crawlDuration, baseCrawlDuration]);
 
-  // Handle speed changes during crawl animation
+  // Handle speed changes during all animation phases
   useEffect(() => {
-    if (phase === "crawl" && crawlStarted && isPlaying && !isPaused && animationStartedRef.current) {
+    // Skip if speed hasn't actually changed
+    if (speed === previousSpeedRef.current) {
+      previousSpeedRef.current = speed;
+      isChangingSpeedRef.current = false;
+      return;
+    }
+
+    if (!isPlaying || isPaused) {
+      previousSpeedRef.current = speed;
+      isChangingSpeedRef.current = false;
+      return;
+    }
+
+    // Mark that we're changing speed to prevent phase transition effect from interfering
+    isChangingSpeedRef.current = true;
+    const previousSpeed = previousSpeedRef.current;
+
+    // Handle speed change during crawl phase
+    if (phase === "crawl" && crawlStarted && animationStartedRef.current) {
       // Calculate current progress based on base duration
       const elapsed = startTimeRef.current 
         ? (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000
@@ -112,7 +133,49 @@ export function CrawlDisplay({
         },
       });
     }
-  }, [speed, phase, crawlStarted, isPlaying, isPaused, controls, crawlDuration, baseCrawlDuration]);
+    
+    // For opening-text and logo phases, adjust phase start time based on speed change
+    // When speed changes, we need to recalculate the elapsed time proportionally
+    if ((phase === "opening-text" || phase === "logo") && phaseStartTimeRef.current !== null) {
+      // Calculate how much real time has elapsed in this phase
+      const realElapsed = (Date.now() - phaseStartTimeRef.current - phasePausedTimeRef.current) / 1000;
+      
+      // Determine the base phase duration (at 1x speed)
+      const basePhaseDuration = phase === "opening-text" 
+        ? CRAWL_CONSTANTS.OPENING_TEXT_DURATION 
+        : CRAWL_CONSTANTS.LOGO_ANIMATION_DURATION;
+      
+      // Calculate how much animation time has elapsed at the previous speed
+      // At previousSpeed, realElapsed seconds = realElapsed * previousSpeed animation seconds
+      const animationTimeElapsed = realElapsed * previousSpeed;
+      
+      // Calculate progress (0-1) based on base duration
+      const phaseProgress = Math.min(animationTimeElapsed / basePhaseDuration, 1);
+      
+      // Determine the new phase duration at the new speed
+      const newPhaseDuration = phase === "opening-text" ? openingTextDuration : logoDuration;
+      
+      // Calculate how much real time should have elapsed to reach this progress at new speed
+      // At speed, we need phaseProgress * newPhaseDuration animation seconds
+      // Which equals (phaseProgress * newPhaseDuration) / speed real seconds
+      const realTimeForProgress = (phaseProgress * newPhaseDuration) / speed;
+      
+      // Reset phase start time so that elapsed time calculation reflects the new speed
+      // We want: elapsed = (now - phaseStartTime) = realTimeForProgress
+      phaseStartTimeRef.current = Date.now() - (realTimeForProgress * 1000);
+      phasePausedTimeRef.current = 0;
+    }
+
+    previousSpeedRef.current = speed;
+    // Reset the flag after a brief delay to allow effects to settle
+    if (speedChangeTimeoutRef.current) {
+      clearTimeout(speedChangeTimeoutRef.current);
+    }
+    speedChangeTimeoutRef.current = setTimeout(() => {
+      isChangingSpeedRef.current = false;
+      speedChangeTimeoutRef.current = null;
+    }, 100);
+  }, [speed, phase, crawlStarted, isPlaying, isPaused, controls, crawlDuration, baseCrawlDuration, openingTextDuration, logoDuration]);
 
   // Calculate total duration (opening + logo + crawl)
   const totalDuration = openingTextDuration + logoDuration + baseCrawlDuration;
@@ -153,11 +216,9 @@ export function CrawlDisplay({
           const overallRemaining = Math.max(0, totalDuration - overallElapsed);
           
           // For crawl phase, also track crawl-specific progress
-          let crawlProgress = 0;
           if (phase === "crawl" && crawlStarted && startTimeRef.current !== null) {
             const crawlElapsed = (Date.now() - startTimeRef.current - totalPausedTimeRef.current - (pauseStartTimeRef.current ? Date.now() - pauseStartTimeRef.current : 0)) / 1000;
-            crawlProgress = Math.min(crawlElapsed / baseCrawlDuration, 1);
-            currentProgressRef.current = crawlProgress;
+            currentProgressRef.current = Math.min(crawlElapsed / baseCrawlDuration, 1);
           }
           
           onProgressChange(overallProgress, overallElapsed, overallRemaining);
@@ -187,8 +248,15 @@ export function CrawlDisplay({
       phaseStartTimeRef.current = null;
       phasePausedTimeRef.current = 0;
       phasePauseStartRef.current = null;
+      previousSpeedRef.current = speed;
       controls.stop();
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
+      return;
+    }
+
+    // Skip phase transition logic if we're in crawl phase - crawl animation handles its own timing
+    // Also skip if we're currently changing speed to prevent interference
+    if ((phase === "crawl" && crawlStarted) || isChangingSpeedRef.current) {
       return;
     }
 
@@ -265,9 +333,18 @@ export function CrawlDisplay({
     }
 
     // Crawl phase completion timer
-    if (phase === "crawl" && !isComplete) {
-      const remaining = Math.max(0, crawlDuration - elapsed);
-      if (remaining <= 0) {
+    // Note: For crawl phase, we don't use phaseStartTimeRef - we use startTimeRef instead
+    // The crawl animation is handled separately, so we only need to check completion
+    // based on the crawl animation progress, not phase timing
+    if (phase === "crawl" && !isComplete && crawlStarted) {
+      // Use crawl animation timing instead of phase timing
+      const crawlElapsed = startTimeRef.current
+        ? (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000
+        : 0;
+      const crawlRemaining = Math.max(0, baseCrawlDuration - crawlElapsed);
+      const remainingAtCurrentSpeed = crawlRemaining / speed;
+      
+      if (crawlRemaining <= 0) {
         setIsComplete(true);
         if (isLooping) {
           // Reset and restart for loop
@@ -305,7 +382,7 @@ export function CrawlDisplay({
         } else {
           onComplete?.();
         }
-      }, remaining * 1000);
+      }, remainingAtCurrentSpeed * 1000);
       return () => clearTimeout(timer);
     }
   }, [
@@ -319,6 +396,11 @@ export function CrawlDisplay({
     crawlDuration,
     onComplete,
     isLooping,
+    crawlStarted,
+    speed,
+    baseCrawlDuration,
+    startTimeRef,
+    totalPausedTimeRef,
   ]);
 
   // Handle seeking
@@ -337,6 +419,9 @@ export function CrawlDisplay({
         startTimeRef.current = null;
         totalPausedTimeRef.current = 0;
         pauseStartTimeRef.current = null;
+        phaseStartTimeRef.current = Date.now();
+        phasePausedTimeRef.current = 0;
+        phasePauseStartRef.current = null;
         overallStartTimeRef.current = Date.now();
         overallPausedTimeRef.current = 0;
         overallPauseStartRef.current = null;
@@ -345,33 +430,62 @@ export function CrawlDisplay({
         return;
       }
       
-      // If seeking to opening/logo phase (but not start), skip to crawl phase
-      if (seekTime < openingTextDuration + logoDuration) {
-        // Skip to start of crawl phase
-        setPhase("crawl");
-        setCrawlStarted(true);
-        animationStartedRef.current = true;
+      // If seeking to opening-text phase
+      if (seekTime < openingTextDuration) {
+        const openingSeekProgress = seekTime / openingTextDuration;
+        setPhase("opening-text");
+        setIsComplete(false);
+        setCrawlStarted(false);
+        animationStartedRef.current = false;
         currentProgressRef.current = 0;
-        startTimeRef.current = Date.now();
+        startTimeRef.current = null;
         totalPausedTimeRef.current = 0;
         pauseStartTimeRef.current = null;
-        overallStartTimeRef.current = Date.now() - (openingTextDuration + logoDuration) * 1000;
+        // Set phase start time so elapsed calculation gives correct progress
+        phaseStartTimeRef.current = Date.now() - (openingSeekProgress * openingTextDuration * 1000);
+        phasePausedTimeRef.current = 0;
+        phasePauseStartRef.current = null;
+        overallStartTimeRef.current = Date.now() - seekTime * 1000;
         overallPausedTimeRef.current = 0;
         overallPauseStartRef.current = null;
+        controls.stop();
         controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-        if (!isPaused) {
-          controls.start({
-            y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
-            transition: {
-              duration: crawlDuration,
-              ease: "linear",
-            },
-          });
-        }
-      } else if (phase === "crawl" && crawlStarted) {
+        return;
+      }
+      
+      // If seeking to logo phase
+      if (seekTime < openingTextDuration + logoDuration) {
+        const logoSeekTime = seekTime - openingTextDuration;
+        const logoSeekProgress = logoSeekTime / logoDuration;
+        setPhase("logo");
+        setIsComplete(false);
+        setCrawlStarted(false);
+        animationStartedRef.current = false;
+        currentProgressRef.current = 0;
+        startTimeRef.current = null;
+        totalPausedTimeRef.current = 0;
+        pauseStartTimeRef.current = null;
+        // Set phase start time so elapsed calculation gives correct progress
+        phaseStartTimeRef.current = Date.now() - (logoSeekProgress * logoDuration * 1000);
+        phasePausedTimeRef.current = 0;
+        phasePauseStartRef.current = null;
+        overallStartTimeRef.current = Date.now() - seekTime * 1000;
+        overallPausedTimeRef.current = 0;
+        overallPauseStartRef.current = null;
+        controls.stop();
+        controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
+        return;
+      }
+      
+      // If seeking to crawl phase
+      if (seekTime >= openingTextDuration + logoDuration) {
         // Seeking within crawl phase
         const crawlSeekTime = seekTime - openingTextDuration - logoDuration;
         const crawlSeekProgress = Math.max(0, Math.min(1, crawlSeekTime / baseCrawlDuration));
+        
+        setPhase("crawl");
+        setCrawlStarted(true);
+        animationStartedRef.current = true;
         
         const startY = parseFloat(CRAWL_CONSTANTS.CRAWL_START_POSITION);
         const endY = parseFloat(CRAWL_CONSTANTS.CRAWL_END_POSITION);
@@ -384,6 +498,9 @@ export function CrawlDisplay({
         startTimeRef.current = now - seekElapsed * 1000;
         totalPausedTimeRef.current = 0;
         pauseStartTimeRef.current = null;
+        phaseStartTimeRef.current = null; // Not used in crawl phase
+        phasePausedTimeRef.current = 0;
+        phasePauseStartRef.current = null;
         overallStartTimeRef.current = now - seekTime * 1000;
         overallPausedTimeRef.current = 0;
         overallPauseStartRef.current = null;
@@ -424,18 +541,31 @@ export function CrawlDisplay({
     }
   }, [crawlStarted, phase, isPlaying, isPaused, controls, crawlDuration]);
 
-  // Reset when crawlData changes
+  // Reset when crawlData changes (NOT when speed changes!)
+  // Use a ref to track previous crawlData to only reset when it actually changes
+  const previousCrawlDataRef = useRef(crawlData);
   useEffect(() => {
-    setPhase("opening-text");
-    setIsComplete(false);
-    setCrawlStarted(false);
-    animationStartedRef.current = false;
-    currentProgressRef.current = 0;
-    startTimeRef.current = null;
-    totalPausedTimeRef.current = 0;
-    pauseStartTimeRef.current = null;
-    controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
-  }, [crawlData, controls]);
+    // Only reset if crawlData actually changed (not just a reference change)
+    const crawlDataChanged = 
+      previousCrawlDataRef.current !== crawlData &&
+      (previousCrawlDataRef.current === null || 
+       crawlData === null ||
+       JSON.stringify(previousCrawlDataRef.current) !== JSON.stringify(crawlData));
+    
+    if (crawlDataChanged) {
+      setPhase("opening-text");
+      setIsComplete(false);
+      setCrawlStarted(false);
+      animationStartedRef.current = false;
+      currentProgressRef.current = 0;
+      startTimeRef.current = null;
+      totalPausedTimeRef.current = 0;
+      pauseStartTimeRef.current = null;
+      previousSpeedRef.current = speed;
+      controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION });
+      previousCrawlDataRef.current = crawlData;
+    }
+  }, [crawlData, controls]); // REMOVED speed from dependencies - this was causing the reset!
 
   // Format crawl text into paragraphs
   const formatMessage = (text: string): string[] => {
