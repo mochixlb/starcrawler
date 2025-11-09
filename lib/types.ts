@@ -17,11 +17,15 @@ export interface CrawlDisplayProps {
   isPlaying: boolean;
   isPaused?: boolean;
   onComplete?: () => void;
-  onProgressChange?: (progress: number, elapsed: number, remaining: number) => void;
+  onProgressChange?: (
+    progress: number,
+    elapsed: number,
+    remaining: number
+  ) => void;
   seekTo?: number; // Progress value 0-1 to seek to
   onPause?: () => void;
   onResume?: () => void;
   onClose?: () => void;
   controlsVisible?: boolean;
+  onControlsVisibilityChange?: (visible: boolean) => void;
 }
-

@@ -273,6 +273,7 @@ function HomeContent() {
             onResume={handleResume}
             onClose={handleComplete}
             controlsVisible={controlsVisible}
+            onControlsVisibilityChange={setControlsVisible}
           />
         )}
 

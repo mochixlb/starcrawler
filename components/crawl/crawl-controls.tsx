@@ -134,50 +134,65 @@ export function CrawlControls({
     useCopyFeedback();
   const [internalVisible, setInternalVisible] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showCenterButton, setShowCenterButton] = useState(true);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
+  const centerButtonDelayRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use external visibility if provided, otherwise use internal state
   const isVisible =
     externalVisible !== undefined ? externalVisible : internalVisible;
   const setIsVisible = onControlsVisibilityChange || setInternalVisible;
 
-  // Auto-hide controls on mouse movement or touch (YouTube-like)
+  // Desktop: show controls on mouse move with auto-hide
   useEffect(() => {
-    const handleInteraction = () => {
+    const handleMouseMove = () => {
       setIsVisible(true);
-
-      // Clear existing timeout
+      setShowCenterButton(true);
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
-
-      // Hide after 3 seconds of inactivity
       hideTimeoutRef.current = setTimeout(() => {
         setIsVisible(false);
+        setShowCenterButton(false);
       }, 3000);
     };
-
-    // Show controls initially, then hide after 3 seconds
-    const initialTimeout = setTimeout(() => {
-      setIsVisible(false);
-    }, 3000);
-
-    // Listen to both mouse and touch events
-    window.addEventListener("mousemove", handleInteraction, { passive: true });
-    window.addEventListener("touchstart", handleInteraction, { passive: true });
-    window.addEventListener("touchmove", handleInteraction, { passive: true });
-
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => {
-      window.removeEventListener("mousemove", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-      window.removeEventListener("touchmove", handleInteraction);
+      window.removeEventListener("mousemove", handleMouseMove);
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
-      clearTimeout(initialTimeout);
     };
   }, [setIsVisible]);
+
+  // When visibility is toggled externally (e.g., by CrawlDisplay), manage auto-hide timer
+  // This ensures controls auto-hide after 3 seconds of inactivity (YouTube-like behavior)
+  useEffect(() => {
+    if (isVisible) {
+      setShowCenterButton(true);
+      // Clear any existing timeout
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+      // Set new timeout to hide controls after 3 seconds
+      hideTimeoutRef.current = setTimeout(() => {
+        setIsVisible(false);
+        setShowCenterButton(false);
+      }, 3000);
+    } else {
+      // Controls are hidden - clear any pending timeout
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
+    }
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [isVisible, setIsVisible]);
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -195,9 +210,11 @@ export function CrawlControls({
   const handleSliderChange = (newProgress: number) => {
     // Show controls when user interacts with slider
     setIsVisible(true);
+    setShowCenterButton(true);
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
+    // Don't set timeout during drag - wait for commit
 
     // Update progress during drag (visual feedback)
     // The actual seek will happen on commit
@@ -209,6 +226,14 @@ export function CrawlControls({
     // Seek to the final position
     onSeek(finalProgress);
     pendingSeekRef.current = null;
+    // Set timeout to hide after 3 seconds
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+      setShowCenterButton(false);
+    }, 3000);
   };
 
   const totalTime = elapsed + remaining;
@@ -225,37 +250,77 @@ export function CrawlControls({
 
   return (
     <>
-      {/* Centered Play Button */}
-      <div
-        className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-300 pointer-events-none ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <button
-          onClick={isPaused ? onResume : onPause}
-          className="pointer-events-auto flex h-24 w-24 items-center justify-center bg-transparent p-0 text-crawl-yellow transition-all hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-black touch-manipulation cursor-pointer"
-          style={{ touchAction: "manipulation" }}
-          aria-label={isPaused ? "Resume crawl" : "Pause crawl"}
-          title={isPaused ? "Resume" : "Pause"}
+      {/* Centered Play Button - Only rendered when controls are visible and center button should show */}
+      {isVisible && showCenterButton && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none transition-opacity duration-300 opacity-100"
+          data-controls-area
         >
-          {isPaused ? (
-            <Play className="size-16 fill-current" />
-          ) : (
-            <Pause className="size-16 fill-current" />
-          )}
-        </button>
-      </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering crawl-display's handleInteraction
+              if (isPaused) {
+                onResume();
+              } else {
+                onPause();
+              }
+              // Keep controls visible when clicking the center button
+              setIsVisible(true);
+              setShowCenterButton(true);
+              if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+              }
+              // Set timeout to hide after 3 seconds
+              hideTimeoutRef.current = setTimeout(() => {
+                setIsVisible(false);
+                setShowCenterButton(false);
+              }, 3000);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation(); // Prevent triggering crawl-display's handleInteraction
+              // Keep controls visible when touching the center button
+              setIsVisible(true);
+              setShowCenterButton(true);
+              if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+              }
+              // Set timeout to hide after 3 seconds
+              hideTimeoutRef.current = setTimeout(() => {
+                setIsVisible(false);
+                setShowCenterButton(false);
+              }, 3000);
+            }}
+            className="pointer-events-auto flex h-24 w-24 items-center justify-center bg-transparent p-0 text-crawl-yellow transition-all hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crawl-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-black touch-manipulation cursor-pointer"
+            style={{ touchAction: "manipulation" }}
+            aria-label={isPaused ? "Resume crawl" : "Pause crawl"}
+            title={isPaused ? "Resume" : "Pause"}
+          >
+            {isPaused ? (
+              <Play className="size-16 fill-current" />
+            ) : (
+              <Pause className="size-16 fill-current" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Bottom Controls */}
       <div
         className={`fixed bottom-0 left-0 right-0 z-50 transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
+        data-controls-area
         onMouseEnter={() => {
           setIsVisible(true);
+          setShowCenterButton(true);
           if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
           }
+          // Set timeout to hide after 3 seconds
+          hideTimeoutRef.current = setTimeout(() => {
+            setIsVisible(false);
+            setShowCenterButton(false);
+          }, 3000);
         }}
         onMouseLeave={() => {
           if (hideTimeoutRef.current) {
@@ -263,16 +328,21 @@ export function CrawlControls({
           }
           hideTimeoutRef.current = setTimeout(() => {
             setIsVisible(false);
+            setShowCenterButton(false);
           }, 1000);
         }}
         onTouchStart={(e) => {
-          // Don't show controls if touching the slider (handled separately)
-          if (!(e.target as HTMLElement).closest('[role="slider"]')) {
-            setIsVisible(true);
-            if (hideTimeoutRef.current) {
-              clearTimeout(hideTimeoutRef.current);
-            }
+          // Always show controls when touching the bottom controls area
+          setIsVisible(true);
+          setShowCenterButton(true);
+          if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
           }
+          // Set timeout to hide after 3 seconds
+          hideTimeoutRef.current = setTimeout(() => {
+            setIsVisible(false);
+            setShowCenterButton(false);
+          }, 3000);
         }}
         style={{
           pointerEvents: isVisible ? "auto" : "none",
@@ -322,14 +392,12 @@ export function CrawlControls({
 
             {/* Right: Copy text, Share, Fullscreen */}
             <div className="flex items-center gap-2">
-              {/* Hide Copy Text button on mobile to save space */}
               <CopyButton
                 onClick={handleCopyText}
                 copied={copiedText}
                 label="Copy Text"
                 icon={<Copy className="size-3.5 shrink-0" />}
                 title="Copy text"
-                className="hidden sm:flex"
               />
               <IconButton
                 onClick={handleShare}

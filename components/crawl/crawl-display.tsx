@@ -21,6 +21,7 @@ export function CrawlDisplay({
   onResume,
   onClose,
   controlsVisible = true,
+  onControlsVisibilityChange,
 }: CrawlDisplayProps) {
   const controls = useAnimation();
   const [phase, setPhase] = useState<AnimationPhase>("opening-text");
@@ -32,6 +33,7 @@ export function CrawlDisplay({
   const totalPausedTimeRef = useRef(0);
   const pauseStartTimeRef = useRef<number | null>(null);
   const [crawlOpacity, setCrawlOpacity] = useState(1);
+  const controlsShownOnceRef = useRef(false);
 
   // Check for reduced motion preference
   const shouldReduceMotion =
@@ -524,31 +526,72 @@ export function CrawlDisplay({
     return null;
   }
 
-  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
-    // Don't toggle if interacting with controls or other interactive elements
-    const target = e.target as HTMLElement;
-    if (
-      target.closest('[role="button"]') ||
-      target.closest('button') ||
-      target.closest('input') ||
-      target.closest('textarea') ||
-      target.closest('[role="slider"]')
-    ) {
+  // Reset the flag when playback stops or when controls auto-hide
+  // Also initialize flag based on initial controls visibility
+  useEffect(() => {
+    if (!isPlaying) {
+      controlsShownOnceRef.current = false;
       return;
     }
-    
-    // Prevent default for touch events to avoid double-firing
-    if (e.type === 'touchstart') {
+    // If controls are visible when playback starts, mark as shown so taps immediately work
+    if (controlsVisible && !controlsShownOnceRef.current) {
+      controlsShownOnceRef.current = true;
+    }
+    // Reset flag when controls auto-hide (like YouTube - next tap will be "first tap" again)
+    if (!controlsVisible) {
+      controlsShownOnceRef.current = false;
+    }
+  }, [isPlaying, controlsVisible]);
+
+  // Global touch handler (capture) to ensure taps anywhere toggle pause/play
+  useEffect(() => {
+    const handleTouchStartCapture = (e: TouchEvent) => {
+      if (!isPlaying) return;
+      const target = e.target as HTMLElement;
+      // Ignore touches on controls or interactive elements
+      if (
+        target.closest('button') ||
+        target.closest('[role="button"]') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('[role="slider"]') ||
+        target.closest('[data-controls-area]')
+      ) {
+        return;
+      }
+      // Prevent synthetic click and double-firing
       e.preventDefault();
-    }
-    
-    // Toggle pause/play
-    if (isPaused && onResume) {
-      onResume();
-    } else if (!isPaused && onPause) {
-      onPause();
-    }
-  };
+      
+      // On mobile: first tap only shows controls, subsequent taps toggle pause/play
+      const isFirstTap = !controlsShownOnceRef.current;
+      
+      // Show controls
+      onControlsVisibilityChange?.(true);
+      
+      // Mark that controls have been shown at least once
+      if (isFirstTap) {
+        controlsShownOnceRef.current = true;
+        // First tap - only show controls, don't toggle pause/play
+        return;
+      }
+      
+      // Subsequent taps - toggle pause/play
+      if (isPaused) {
+        onResume?.();
+      } else {
+        onPause?.();
+      }
+    };
+    document.addEventListener("touchstart", handleTouchStartCapture, {
+      capture: true,
+      passive: false,
+    });
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStartCapture, {
+        capture: true,
+      } as any);
+    };
+  }, [isPlaying, isPaused, onPause, onResume, onControlsVisibilityChange]);
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering click-to-pause
@@ -560,8 +603,6 @@ export function CrawlDisplay({
   return (
     <div
       className="fixed inset-0 z-10 overflow-hidden cursor-pointer"
-      onClick={handleInteraction}
-      onTouchStart={handleInteraction}
       style={{
         perspective: CRAWL_CONSTANTS.PERSPECTIVE,
         perspectiveOrigin: "50% 50%",
