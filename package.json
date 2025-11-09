@@ -10,8 +10,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hexagon/base64": "^2.0.4",
@@ -28,21 +27,21 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/ui": "^2.1.8",
+    "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/ui": "^4.0.8",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.1",
-    "jsdom": "^25.0.1",
+    "jsdom": "^27.1.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vitest": "^2.1.8"
+    "vitest": "^4.0.8"
   }
 }
