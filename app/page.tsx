@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RotateCcw, Square } from "lucide-react";
 import { Starfield } from "@/components/crawl/starfield";
 import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
@@ -51,11 +52,12 @@ export default function Home() {
             />
 
             {crawlData && !isPlaying && (
-              <div className="mt-2 text-center">
+              <div className="mt-6 flex justify-center">
                 <button
                   onClick={handleReset}
-                  className="rounded-md border border-crawl-yellow/50 px-4 py-1.5 text-sm font-medium text-crawl-yellow hover:border-crawl-yellow"
+                  className="inline-flex items-center gap-2 rounded-md border border-crawl-yellow/50 px-5 py-2.5 text-sm font-medium text-crawl-yellow transition-colors hover:border-crawl-yellow hover:bg-crawl-yellow/10"
                 >
+                  <RotateCcw className="size-4" />
                   Reset
                 </button>
               </div>
@@ -74,9 +76,10 @@ export default function Home() {
           <div className="fixed bottom-8 left-1/2 z-30 -translate-x-1/2">
             <button
               onClick={handleComplete}
-              className="rounded-md border border-crawl-yellow/50 bg-black/80 px-6 py-2 font-medium text-crawl-yellow backdrop-blur-sm hover:border-crawl-yellow"
+              className="inline-flex items-center gap-2 rounded-md border border-crawl-yellow/50 bg-black/80 px-6 py-2.5 font-medium text-crawl-yellow backdrop-blur-sm transition-colors hover:border-crawl-yellow hover:bg-black/90"
               aria-label="Stop crawl animation"
             >
+              <Square className="size-4 fill-current" />
               Stop
             </button>
           </div>

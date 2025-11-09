@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FormInput } from "@/components/ui/form-input";
@@ -151,9 +152,10 @@ export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
 
       <Button
         type="submit"
-        className="mt-2 w-full bg-crawl-yellow py-2 text-sm font-bold text-black hover:bg-crawl-yellow/90 sm:py-2.5 sm:text-base"
+        className="mt-6 w-full bg-crawl-yellow py-2.5 text-sm font-bold text-black transition-colors hover:bg-crawl-yellow/90 sm:py-3 sm:text-base"
         disabled={isCrawlOverLimit || !crawlText.trim()}
       >
+        <Play className="size-4 fill-current" />
         Play Crawl
       </Button>
     </form>
