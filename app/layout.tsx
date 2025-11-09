@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Star Crawler - Create Your Star Wars Opening Crawl",
-  description: "Create your own Star Wars opening crawl animation",
+  title: "Star Crawler - Create Your Opening Crawl",
+  description: "Create your own opening crawl animation",
 };
 
 export default function RootLayout({

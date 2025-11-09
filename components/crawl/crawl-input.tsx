@@ -3,94 +3,143 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { FormInput } from "@/components/ui/form-input";
 import { FORM_CONSTANTS } from "@/lib/constants";
-import type { CrawlInputProps } from "@/components/shared/types";
+import { validateCrawlText } from "@/lib/validation";
+import type { CrawlInputProps } from "@/lib/types";
 
-export function CrawlInput({ onSubmit, initialValue = "" }: CrawlInputProps) {
-  const [message, setMessage] = useState(initialValue);
+const DEFAULT_OPENING_TEXT = "A long time ago in a galaxy far, far away....";
+const DEFAULT_LOGO_TEXT = "STAR CRAWLER";
+
+export function CrawlInput({ onSubmit, initialData }: CrawlInputProps) {
+  const [openingText, setOpeningText] = useState(
+    initialData?.openingText || DEFAULT_OPENING_TEXT
+  );
+  const [logoText, setLogoText] = useState(
+    initialData?.logoText || DEFAULT_LOGO_TEXT
+  );
+  const [episodeNumber, setEpisodeNumber] = useState(
+    initialData?.episodeNumber || ""
+  );
+  const [episodeSubtitle, setEpisodeSubtitle] = useState(
+    initialData?.episodeSubtitle || ""
+  );
+  const [crawlText, setCrawlText] = useState(initialData?.crawlText || "");
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate character count
-  const characterCount = message.length;
-  const isOverLimit = characterCount > FORM_CONSTANTS.MAX_MESSAGE_LENGTH;
-  const isUnderLimit = characterCount < FORM_CONSTANTS.MIN_MESSAGE_LENGTH;
+  // Calculate character count for crawl text
+  const crawlTextLength = crawlText.length;
+  const isCrawlOverLimit = crawlTextLength > FORM_CONSTANTS.MAX_MESSAGE_LENGTH;
+  const isCrawlUnderLimit = crawlTextLength < FORM_CONSTANTS.MIN_MESSAGE_LENGTH;
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
-    const trimmedMessage = message.trim();
+    const trimmedCrawlText = crawlText.trim();
+    const validation = validateCrawlText(trimmedCrawlText);
 
-    // Validation
-    if (!trimmedMessage) {
-      setError("Please enter a message");
+    if (!validation.isValid) {
+      setError(validation.error || "Invalid crawl text");
       return;
     }
 
-    if (trimmedMessage.length < FORM_CONSTANTS.MIN_MESSAGE_LENGTH) {
-      setError(
-        `Message must be at least ${FORM_CONSTANTS.MIN_MESSAGE_LENGTH} characters`
-      );
-      return;
-    }
-
-    if (trimmedMessage.length > FORM_CONSTANTS.MAX_MESSAGE_LENGTH) {
-      setError(
-        `Message must be no more than ${FORM_CONSTANTS.MAX_MESSAGE_LENGTH} characters`
-      );
-      return;
-    }
-
-    // Submit valid message
-    onSubmit(trimmedMessage);
+    // Submit valid data
+    onSubmit({
+      openingText: openingText.trim() || DEFAULT_OPENING_TEXT,
+      logoText: logoText.trim().toUpperCase() || DEFAULT_LOGO_TEXT,
+      episodeNumber: episodeNumber.trim().toUpperCase(),
+      episodeSubtitle: episodeSubtitle.trim().toUpperCase(),
+      crawlText: trimmedCrawlText,
+    });
   };
 
-  // Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    setMessage(newValue);
-    // Clear error when user starts typing
+  // Handle input changes
+  const handleCrawlTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCrawlText(e.target.value);
     if (error) {
       setError(null);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-4">
-      <div className="space-y-2">
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-3">
+      {/* Opening Text Input */}
+      <FormInput
+        id="opening-text"
+        label="Opening Text"
+        labelColor="cyan"
+        type="text"
+        value={openingText}
+        onChange={(e) => setOpeningText(e.target.value)}
+        placeholder={DEFAULT_OPENING_TEXT}
+      />
+
+      {/* Logo Text Input */}
+      <FormInput
+        id="logo-text"
+        label="Logo Text"
+        type="text"
+        value={logoText}
+        onChange={(e) => setLogoText(e.target.value)}
+        placeholder={DEFAULT_LOGO_TEXT}
+      />
+
+      {/* Episode Number and Subtitle */}
+      <div className="grid grid-cols-2 gap-3">
+        <FormInput
+          id="episode-number"
+          label="Episode Number"
+          type="text"
+          value={episodeNumber}
+          onChange={(e) => setEpisodeNumber(e.target.value)}
+          placeholder="IV"
+        />
+        <FormInput
+          id="episode-subtitle"
+          label="Episode Subtitle"
+          type="text"
+          value={episodeSubtitle}
+          onChange={(e) => setEpisodeSubtitle(e.target.value)}
+          placeholder="A New Hope"
+        />
+      </div>
+
+      {/* Crawl Text Input */}
+      <div className="space-y-1">
         <label
-          htmlFor="crawl-message"
-          className="text-sm font-medium text-starwars-yellow"
+          htmlFor="crawl-text"
+          className="text-xs font-medium text-starwars-yellow sm:text-sm"
         >
-          Enter your message
+          Crawl Text
         </label>
         <Textarea
-          id="crawl-message"
-          value={message}
-          onChange={handleChange}
-          placeholder="A long time ago in a galaxy far, far away..."
-          className="min-h-[200px] border-starwars-yellow/30 bg-black text-white placeholder:text-gray-600 focus:border-starwars-yellow focus:ring-starwars-yellow"
-          aria-describedby="message-help message-error"
+          id="crawl-text"
+          value={crawlText}
+          onChange={handleCrawlTextChange}
+          placeholder="It is a period of civil war..."
+          className="min-h-[120px] border-starwars-yellow/30 bg-black text-sm text-white placeholder:text-gray-400 focus:border-starwars-yellow focus:ring-starwars-yellow sm:min-h-[140px]"
+          aria-describedby="crawl-help crawl-error"
         />
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             <p
-              id="message-help"
-              className={`text-xs ${
-                isOverLimit
+              id="crawl-help"
+              className={`text-[10px] sm:text-xs ${
+                isCrawlOverLimit
                   ? "text-red-500"
-                  : isUnderLimit
+                  : isCrawlUnderLimit
                     ? "text-yellow-500"
-                    : "text-gray-400"
+                    : "text-gray-300"
               }`}
             >
-              {characterCount} / {FORM_CONSTANTS.MAX_MESSAGE_LENGTH} characters
+              {crawlTextLength} / {FORM_CONSTANTS.MAX_MESSAGE_LENGTH} characters
             </p>
             {error && (
               <p
-                id="message-error"
-                className="text-xs text-red-500"
+                id="crawl-error"
+                className="text-[10px] text-red-500 sm:text-xs"
                 role="alert"
               >
                 {error}
@@ -102,10 +151,10 @@ export function CrawlInput({ onSubmit, initialValue = "" }: CrawlInputProps) {
 
       <Button
         type="submit"
-        className="w-full bg-starwars-yellow font-bold text-black hover:bg-starwars-yellow/90"
-        disabled={isOverLimit || !message.trim()}
+        className="mt-2 w-full bg-starwars-yellow py-2 text-sm font-bold text-black hover:bg-starwars-yellow/90 sm:py-2.5 sm:text-base"
+        disabled={isCrawlOverLimit || !crawlText.trim()}
       >
-        Create Crawl
+        Play Crawl
       </Button>
     </form>
   );

@@ -53,6 +53,7 @@ const config: Config = {
         "starwars-yellow": "#FFE81F",
         "starwars-black": "#000000",
         "starwars-blue": "#4A90E2",
+        "starwars-cyan": "#4BD5EE", // Opening text blue
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -60,16 +61,30 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        "starwars": [
+        starwars: [
           '"Franklin Gothic Heavy"',
           '"Franklin Gothic Demi"',
           '"Arial Black"',
           "Impact",
           "sans-serif",
         ],
+        "opening-text": [
+          '"Franklin Gothic Book"',
+          '"Franklin Gothic"',
+          "Arial",
+          "sans-serif",
+        ],
+        logo: [
+          '"Helvetica Black"',
+          '"Helvetica Neue"',
+          '"Arial Black"',
+          '"Franklin Gothic Heavy"',
+          "Impact",
+          "sans-serif",
+        ],
       },
       animation: {
-        "crawl": "crawl 45s linear infinite",
+        crawl: "crawl 45s linear infinite",
       },
       keyframes: {
         crawl: {
@@ -83,4 +98,3 @@ const config: Config = {
 };
 
 export default config;
-

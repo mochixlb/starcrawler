@@ -100,7 +100,7 @@ export function Starfield() {
   ];
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden bg-starwars-black">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-starwars-black">
       {layers.map((layer, index) => (
         <StarLayer
           key={index}

@@ -4,14 +4,15 @@ import { useState } from "react";
 import { Starfield } from "@/components/crawl/starfield";
 import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
+import type { CrawlData } from "@/lib/types";
 
 export default function Home() {
-  const [crawlMessage, setCrawlMessage] = useState<string>("");
+  const [crawlData, setCrawlData] = useState<CrawlData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Handle form submission
-  const handleSubmit = (message: string) => {
-    setCrawlMessage(message);
+  const handleSubmit = (data: CrawlData) => {
+    setCrawlData(data);
     setIsPlaying(true);
   };
 
@@ -22,7 +23,7 @@ export default function Home() {
 
   // Reset to input form
   const handleReset = () => {
-    setCrawlMessage("");
+    setCrawlData(null);
     setIsPlaying(false);
   };
 
@@ -32,31 +33,28 @@ export default function Home() {
       <Starfield />
 
       {/* Main content */}
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center p-8">
-        {!crawlMessage || !isPlaying ? (
-          <div className="w-full max-w-2xl space-y-8">
+      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
+        {!crawlData || !isPlaying ? (
+          <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1 className="mb-4 font-starwars text-5xl font-bold text-starwars-yellow md:text-6xl">
+              <h1 className="mb-2 font-starwars text-3xl font-bold text-starwars-yellow sm:text-4xl md:text-5xl">
                 STAR CRAWLER
               </h1>
-              <p className="text-lg text-gray-400">
-                Create your own Star Wars opening crawl
+              <p className="text-sm text-gray-200 sm:text-base">
+                Create your own opening crawl
               </p>
             </div>
 
-            <CrawlInput onSubmit={handleSubmit} />
+            <CrawlInput
+              onSubmit={handleSubmit}
+              initialData={crawlData || undefined}
+            />
 
-            {crawlMessage && !isPlaying && (
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => setIsPlaying(true)}
-                  className="rounded-md bg-starwars-yellow px-6 py-2 font-bold text-black hover:bg-starwars-yellow/90"
-                >
-                  Play Crawl
-                </button>
+            {crawlData && !isPlaying && (
+              <div className="mt-2 text-center">
                 <button
                   onClick={handleReset}
-                  className="ml-4 rounded-md border border-starwars-yellow/50 px-6 py-2 font-medium text-starwars-yellow hover:border-starwars-yellow"
+                  className="rounded-md border border-starwars-yellow/50 px-4 py-1.5 text-sm font-medium text-starwars-yellow hover:border-starwars-yellow"
                 >
                   Reset
                 </button>
@@ -65,7 +63,7 @@ export default function Home() {
           </div>
         ) : (
           <CrawlDisplay
-            message={crawlMessage}
+            crawlData={crawlData}
             isPlaying={isPlaying}
             onComplete={handleComplete}
           />
