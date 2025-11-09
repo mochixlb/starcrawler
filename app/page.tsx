@@ -224,7 +224,7 @@ function HomeContent() {
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1 className="mb-3 font-crawl text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl" style={{ letterSpacing: "0.15em" }}>
+              <h1 className="mb-3 font-logo text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl" style={{ letterSpacing: "0.15em" }}>
                 STAR CRAWLER
               </h1>
               <p className="font-opening-text text-sm text-gray-300 sm:text-base" style={{ letterSpacing: "0.05em" }}>
@@ -321,7 +321,7 @@ export default function Home() {
         <Starfield />
         <div className="relative z-20 flex min-h-screen flex-col items-center justify-center">
           <div className="text-center">
-            <h1 className="mb-2 font-crawl text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
+            <h1 className="mb-2 font-logo text-3xl font-bold text-crawl-yellow sm:text-4xl md:text-5xl">
               STAR CRAWLER
             </h1>
             <p className="text-sm text-gray-200 sm:text-base">

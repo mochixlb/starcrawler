@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Star Jedi Font */
+@font-face {
+  font-family: "Star Jedi";
+  src: local("Star Jedi"),
+       url("/fonts/Starjedi.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Star Jedi Hollow Font */
+@font-face {
+  font-family: "Star Jedi Hollow";
+  src: local("Star Jedi Hollow"),
+       url("/fonts/Starjhol.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-background: hsl(0 0% 100%);
   --color-foreground: hsl(0 0% 3.9%);
@@ -33,6 +53,8 @@
   --crawl-perspective: 400px;
   --crawl-rotation: 25deg;
   --crawl-duration: 45s;
+  --font-logo: "Star Jedi", "Helvetica Black", "Helvetica Neue", "Arial Black", "Franklin Gothic Heavy", Impact, sans-serif;
+  --font-logo-hollow: "Star Jedi Hollow", "Star Jedi", "Helvetica Black", "Helvetica Neue", "Arial Black", "Franklin Gothic Heavy", Impact, sans-serif;
 }
 
 @layer base {

@@ -73,14 +73,6 @@ const config: Config = {
           "Arial",
           "sans-serif",
         ],
-        logo: [
-          '"Helvetica Black"',
-          '"Helvetica Neue"',
-          '"Arial Black"',
-          '"Franklin Gothic Heavy"',
-          "Impact",
-          "sans-serif",
-        ],
       },
       animation: {
         crawl: "crawl 45s linear infinite",

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Minimalist star constellation - clean and simple -->
+  <!-- Central star -->
+  <circle cx="16" cy="16" r="2.5" fill="#FFE81F"/>
+  
+  <!-- Four surrounding stars forming a constellation -->
+  <circle cx="16" cy="8" r="1.5" fill="#FFE81F"/>
+  <circle cx="24" cy="16" r="1.5" fill="#FFE81F"/>
+  <circle cx="16" cy="24" r="1.5" fill="#FFE81F"/>
+  <circle cx="8" cy="16" r="1.5" fill="#FFE81F"/>
+</svg>
+
