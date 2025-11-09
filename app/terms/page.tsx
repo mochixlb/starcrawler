@@ -104,11 +104,6 @@ export default function TermsPage() {
         These Terms of Service are governed by and construed in accordance with the laws of the United States, without regard to its conflict of law provisions. Any disputes arising from or relating to these terms or your use of Star Crawler shall be resolved in accordance with applicable United States law.
       </p>
 
-      <h2>Dispute Resolution</h2>
-      <p>
-        Star Crawler is provided as a free personal project. If you have concerns about the service, please review these terms and our other legal pages. Given the nature of this project, we encourage resolving any issues through understanding how the service works rather than formal dispute resolution.
-      </p>
-
       <h2>Severability</h2>
       <p>
         If any provision of these terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that these terms will otherwise remain in full force and effect.
@@ -123,10 +118,8 @@ export default function TermsPage() {
       <p>
         We might update these terms occasionally. If we make big changes, we'll try to let you know. The date at the top shows when we last updated them. Your continued use of Star Crawler after changes are posted constitutes your acceptance of the new terms.
       </p>
-
-      <h2>Questions About These Terms</h2>
       <p>
-        These terms are designed to be straightforward and reflect how Star Crawler works as a free personal project. If you have questions about how the service operates, you can review the <Link href="/" className="text-crawl-yellow hover:underline">homepage</Link> for more information.
+        If you have questions about how Star Crawler works, you can review the <Link href="/" className="text-crawl-yellow hover:underline">homepage</Link> for more information.
       </p>
     </LegalLayout>
   );

@@ -2,20 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalLayout } from "@/components/legal/legal-layout";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Star Crawler",
-  description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+  description:
+    "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
   openGraph: {
     title: "Privacy Policy - Star Crawler",
-    description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+    description:
+      "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
     url: `${baseUrl}/privacy`,
   },
   twitter: {
     card: "summary",
     title: "Privacy Policy - Star Crawler",
-    description: "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
+    description:
+      "Privacy Policy for Star Crawler - Learn how we collect, use, and protect your information",
   },
 };
 
@@ -23,12 +27,22 @@ export default function PrivacyPage() {
   return (
     <LegalLayout title="Privacy Policy">
       <p className="text-gray-300">
-        <strong>Last Updated:</strong> {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        <strong>Last Updated:</strong>{" "}
+        {new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
       </p>
 
       <h2>We Don't Collect Your Data</h2>
       <p>
-        <strong>Star Crawler doesn't collect, store, or share your personal information.</strong> This is a free, open-source personal project licensed under the MIT License, and everything you create stays in your browser.
+        <strong>
+          Star Crawler doesn't collect, store, or share your personal
+          information.
+        </strong>{" "}
+        This is a free, open-source personal project licensed under the MIT
+        License, and everything you create stays in your browser.
       </p>
 
       <h2>What We Don't Do</h2>
@@ -43,99 +57,164 @@ export default function PrivacyPage() {
 
       <h2>How It Works</h2>
       <p>
-        When you create a crawl animation, your text is encoded and put into the URL of your browser. That's it. The content exists only in that URL—we never see it, store it, or process it.
+        When you create a crawl animation, your text is encoded and put into the
+        URL of your browser. That's it. The content exists only in that URL—we
+        never see it, store it, or process it.
       </p>
       <p>
-        If you share the link with someone, they can see your crawl. But we still don't store it anywhere. The content lives only in the URL you share.
+        If you share the link with someone, they can see your crawl. But we
+        still don't store it anywhere. The content lives only in the URL you
+        share.
       </p>
 
       <h2>Browser Features We Use</h2>
       <p>
-        Star Crawler uses some standard browser features that work entirely on your device:
+        Star Crawler uses some standard browser features that work entirely on
+        your device:
       </p>
       <ul>
-        <li><strong>Copy to clipboard:</strong> Lets you copy the shareable link</li>
-        <li><strong>Fullscreen:</strong> Lets you watch crawls in fullscreen mode</li>
-        <li><strong>Share:</strong> Lets you share via your device's built-in sharing</li>
+        <li>
+          <strong>Copy to clipboard:</strong> Lets you copy the shareable link
+        </li>
+        <li>
+          <strong>Fullscreen:</strong> Lets you watch crawls in fullscreen mode
+        </li>
+        <li>
+          <strong>Share:</strong> Lets you share via your device's built-in
+          sharing
+        </li>
       </ul>
       <p>
-        These features work locally on your device. Nothing is sent to any servers.
+        These features work locally on your device. Nothing is sent to any
+        servers.
       </p>
 
       <h2>What About Server Logs?</h2>
       <p>
-        Like any website, our hosting provider may automatically keep standard server logs. These typically include technical information such as IP addresses, timestamps, browser types, and which pages were visited. This is standard web server functionality—not something we actively collect, use, or control.
+        Like any website, our hosting provider may automatically keep standard
+        server logs. These typically include technical information such as IP
+        addresses, timestamps, browser types, and which pages were visited. This
+        is standard web server functionality—not something we actively collect,
+        use, or control.
       </p>
       <p>
-        We do not use these logs for any purpose. They are automatically generated by our hosting infrastructure and are typically retained for a limited time for technical and security purposes only. We do not analyze, sell, or share this information with third parties.
+        We do not use these logs for any purpose. They are automatically
+        generated by our hosting infrastructure and are typically retained for a
+        limited time for technical and security purposes only. We do not
+        analyze, sell, or share this information with third parties.
       </p>
       <p>
-        <strong>For EU users:</strong> Under GDPR, IP addresses may be considered personal data. However, since we do not actively process, use, or store this information beyond what is automatically logged by our hosting provider, and we do not use it to identify individuals, our data collection is minimal and compliant with GDPR requirements.
+        <strong>For EU users:</strong> Under GDPR, IP addresses may be
+        considered personal data. However, since we do not actively process,
+        use, or store this information beyond what is automatically logged by
+        our hosting provider, and we do not use it to identify individuals, our
+        data collection is minimal and compliant with GDPR requirements.
       </p>
 
       <h2>Sharing Your Crawls</h2>
       <p>
-        When you share a crawl link on social media (Twitter, Facebook, etc.), you're using those platforms' services. We're not responsible for how those platforms handle your data—that's between you and them.
+        When you share a crawl link on social media (Twitter, Facebook, etc.),
+        you're using those platforms' services. We're not responsible for how
+        those platforms handle your data—that's between you and them.
       </p>
 
       <h2>Your Privacy Rights</h2>
       <p>
-        Since we do not collect your personal data, there is no data to access, correct, delete, or opt out of. However, you have the following rights:
+        Since we do not collect your personal data, there is no data to access,
+        correct, delete, or opt out of. However, you have the following rights:
       </p>
       <ul>
-        <li><strong>Right to Know:</strong> You have the right to know what data we collect. As stated throughout this policy, we collect no personal data.</li>
-        <li><strong>Right to Access:</strong> Since we collect no data, there is nothing to access.</li>
-        <li><strong>Right to Deletion:</strong> Since we collect no data, there is nothing to delete.</li>
-        <li><strong>Right to Opt-Out:</strong> Since we do not sell or share data (because we collect none), there is nothing to opt out of.</li>
-        <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising your privacy rights.</li>
+        <li>
+          <strong>Right to Know:</strong> You have the right to know what data
+          we collect. As stated throughout this policy, we collect no personal
+          data.
+        </li>
+        <li>
+          <strong>Right to Access:</strong> Since we collect no data, there is
+          nothing to access.
+        </li>
+        <li>
+          <strong>Right to Deletion:</strong> Since we collect no data, there is
+          nothing to delete.
+        </li>
+        <li>
+          <strong>Right to Opt-Out:</strong> Since we do not sell or share data
+          (because we collect none), there is nothing to opt out of.
+        </li>
+        <li>
+          <strong>Right to Non-Discrimination:</strong> We will not discriminate
+          against you for exercising your privacy rights.
+        </li>
       </ul>
       <p>
-        <strong>For California residents (CCPA):</strong> Under the California Consumer Privacy Act, you have the right to know what personal information we collect, use, and share. As stated in this policy, we collect no personal information. You also have the right to request deletion of personal information, but since we collect none, there is nothing to delete.
+        <strong>For California residents (CCPA):</strong> Under the California
+        Consumer Privacy Act, you have the right to know what personal
+        information we collect, use, and share. As stated in this policy, we
+        collect no personal information. You also have the right to request
+        deletion of personal information, but since we collect none, there is
+        nothing to delete.
       </p>
       <p>
-        <strong>For EU residents (GDPR):</strong> Under the General Data Protection Regulation, you have rights regarding your personal data. Since we do not actively collect or process personal data beyond automatic server logs (which we do not use), these rights are largely inapplicable.
+        <strong>For EU residents (GDPR):</strong> Under the General Data
+        Protection Regulation, you have rights regarding your personal data.
+        Since we do not actively collect or process personal data beyond
+        automatic server logs (which we do not use), these rights are largely
+        inapplicable.
       </p>
 
       <h2>Data Retention</h2>
       <p>
-        Since we do not collect or store your personal information, there is no data to retain. Your crawl content exists only in URLs that you create and share. If you lose the URL, the content cannot be recovered because we never stored it.
+        Since we do not collect or store your personal information, there is no
+        data to retain. Your crawl content exists only in URLs that you create
+        and share. If you lose the URL, the content cannot be recovered because
+        we never stored it.
       </p>
       <p>
-        Any server logs that may be automatically generated by our hosting provider are typically retained for a limited period (usually 30-90 days) for technical and security purposes only, then automatically deleted.
+        Any server logs that may be automatically generated by our hosting
+        provider are typically retained for a limited period (usually 30-90
+        days) for technical and security purposes only, then automatically
+        deleted.
       </p>
 
       <h2>Data Security</h2>
       <p>
-        Since Star Crawler operates entirely in your browser and does not transmit your content to our servers, your data security is primarily managed by your browser and device. We recommend:
+        Since Star Crawler operates entirely in your browser and does not
+        transmit your content to our servers, your data security is primarily
+        managed by your browser and device. We recommend:
       </p>
       <ul>
         <li>Using a modern, up-to-date browser</li>
         <li>Being cautious when sharing URLs containing your crawl content</li>
-        <li>Understanding that anyone with your crawl URL can view your content</li>
+        <li>
+          Understanding that anyone with your crawl URL can view your content
+        </li>
       </ul>
       <p>
-        Our hosting infrastructure uses standard security measures (HTTPS encryption, secure hosting) to protect the website itself, but your crawl content never reaches our servers.
+        Our hosting infrastructure uses standard security measures (HTTPS
+        encryption, secure hosting) to protect the website itself, but your
+        crawl content never reaches our servers.
       </p>
 
       <h2>Children Under 13 (COPPA)</h2>
       <p>
-        Star Crawler is not specifically designed for children under 13, but anyone can use it. Since we do not knowingly collect personal information from anyone, including children under 13, we are compliant with the Children's Online Privacy Protection Act (COPPA).
-      </p>
-      <p>
-        Given that we do not collect personal information, this scenario is unlikely to occur.
+        Star Crawler is not specifically designed for children under 13. Since
+        we do not collect personal information from anyone, including children
+        under 13, we are compliant with the Children's Online Privacy Protection
+        Act (COPPA).
       </p>
 
       <h2>Changes to This Policy</h2>
       <p>
-        If we ever change how we handle privacy, we'll update this page and change the date above. But honestly, we don't plan on collecting data—that's not what Star Crawler is about.
-      </p>
-
-      <h2>About This Policy</h2>
-      <p>
-        Star Crawler is a personal project that operates without collecting personal data. Since we do not collect, store, or process personal information, there is no data to access, modify, or delete. This policy reflects our commitment to privacy by design—your content never leaves your browser.
+        If we ever change how we handle privacy, we'll update this page and
+        change the date above. But honestly, we don't plan on collecting
+        data—that's not what Star Crawler is about.
       </p>
       <p>
-        If you have questions about how Star Crawler works, you can review the <Link href="/" className="text-crawl-yellow hover:underline">homepage</Link> for more information about the service.
+        If you have questions about how Star Crawler works, you can review the{" "}
+        <Link href="/" className="text-crawl-yellow hover:underline">
+          homepage
+        </Link>{" "}
+        for more information about the service.
       </p>
     </LegalLayout>
   );
