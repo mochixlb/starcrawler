@@ -115,12 +115,18 @@ function HomeContent() {
   // Handle seeking
   const handleSeek = useCallback((newProgress: number) => {
     setSeekTo(newProgress);
+    // Update progress immediately for visual feedback (slider position)
+    const totalDuration = elapsed + remaining || 1; // Fallback to 1 to avoid division by zero
+    const newElapsed = newProgress * totalDuration;
+    const newRemaining = totalDuration - newElapsed;
+    setProgress(newProgress);
+    setElapsed(newElapsed);
+    setRemaining(newRemaining);
     // Clear seekTo after a longer delay to ensure it's processed
-    // Use a ref to track timeout and clear previous ones
     setTimeout(() => {
       setSeekTo(undefined);
     }, 200);
-  }, []);
+  }, [elapsed, remaining]);
 
   // Handle fullscreen toggle
   const handleToggleFullscreen = useCallback(() => {

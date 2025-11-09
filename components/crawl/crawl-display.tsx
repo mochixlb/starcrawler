@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { X } from "lucide-react";
 import { CRAWL_CONSTANTS } from "@/lib/constants";
@@ -140,7 +140,7 @@ export function CrawlDisplay({
 
   // Track animation progress and report to parent
   useEffect(() => {
-    if (isPlaying && !isComplete) {
+    if (isPlaying && !isComplete && !isPaused) {
       const interval = setInterval(() => {
         if (overallStartTimeRef.current !== null && onProgressChange) {
           const overallElapsed = (Date.now() - overallStartTimeRef.current - overallPausedTimeRef.current - (overallPauseStartRef.current ? Date.now() - overallPauseStartRef.current : 0)) / 1000;
@@ -543,44 +543,61 @@ export function CrawlDisplay({
     }
   }, [isPlaying, controlsVisible]);
 
-  // Global touch handler (capture) to ensure taps anywhere toggle pause/play
-  useEffect(() => {
-    const handleTouchStartCapture = (e: TouchEvent) => {
+  // Helper function to check if target is an interactive element
+  const isInteractiveElement = (target: HTMLElement): boolean => {
+    return !!(
+      target.closest('button') ||
+      target.closest('[role="button"]') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
+      target.closest('[role="slider"]') ||
+      target.closest('[data-controls-area]')
+    );
+  };
+
+  // Handle interaction (touch or click) to toggle pause/play
+  const handleInteraction = useCallback(
+    (e: TouchEvent | MouseEvent, isTouch: boolean) => {
       if (!isPlaying) return;
       const target = e.target as HTMLElement;
-      // Ignore touches on controls or interactive elements
-      if (
-        target.closest('button') ||
-        target.closest('[role="button"]') ||
-        target.closest('input') ||
-        target.closest('textarea') ||
-        target.closest('[role="slider"]') ||
-        target.closest('[data-controls-area]')
-      ) {
+      
+      // Ignore interactions on controls or interactive elements
+      if (isInteractiveElement(target)) {
         return;
       }
-      // Prevent synthetic click and double-firing
-      e.preventDefault();
-      
-      // On mobile: first tap only shows controls, subsequent taps toggle pause/play
-      const isFirstTap = !controlsShownOnceRef.current;
-      
+
+      if (isTouch) {
+        // Prevent synthetic click and double-firing on mobile
+        e.preventDefault();
+      }
+
       // Show controls
       onControlsVisibilityChange?.(true);
-      
-      // Mark that controls have been shown at least once
-      if (isFirstTap) {
-        controlsShownOnceRef.current = true;
-        // First tap - only show controls, don't toggle pause/play
-        return;
+
+      // On mobile: first tap only shows controls, subsequent taps toggle pause/play
+      // On desktop: always toggle pause/play immediately
+      if (isTouch) {
+        const isFirstTap = !controlsShownOnceRef.current;
+        if (isFirstTap) {
+          controlsShownOnceRef.current = true;
+          return; // First tap - only show controls
+        }
       }
-      
-      // Subsequent taps - toggle pause/play
+
+      // Toggle pause/play
       if (isPaused) {
         onResume?.();
       } else {
         onPause?.();
       }
+    },
+    [isPlaying, isPaused, onPause, onResume, onControlsVisibilityChange]
+  );
+
+  // Global touch handler (capture) for mobile
+  useEffect(() => {
+    const handleTouchStartCapture = (e: TouchEvent) => {
+      handleInteraction(e, true);
     };
     document.addEventListener("touchstart", handleTouchStartCapture, {
       capture: true,
@@ -591,7 +608,25 @@ export function CrawlDisplay({
         capture: true,
       } as any);
     };
-  }, [isPlaying, isPaused, onPause, onResume, onControlsVisibilityChange]);
+  }, [handleInteraction]);
+
+  // Global click handler for desktop
+  useEffect(() => {
+    const handleClickCapture = (e: MouseEvent) => {
+      // Only handle clicks on desktop (not touch devices to avoid double-firing)
+      if (window.matchMedia('(pointer: fine)').matches) {
+        handleInteraction(e, false);
+      }
+    };
+    document.addEventListener("click", handleClickCapture, {
+      capture: true,
+    });
+    return () => {
+      document.removeEventListener("click", handleClickCapture, {
+        capture: true,
+      } as any);
+    };
+  }, [handleInteraction]);
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering click-to-pause
