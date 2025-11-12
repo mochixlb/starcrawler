@@ -1,26 +1,28 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import {
+  siteConfig,
+  createMetadata,
+  getWebApplicationStructuredData,
+} from "@/lib/seo";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
+const baseMetadata = createMetadata({
+  title: "Star Crawler - Create Your Opening Crawl",
+  description: siteConfig.description,
+  path: "/",
+  structuredData: getWebApplicationStructuredData(),
+});
 
 export const metadata: Metadata = {
-  title: "Star Crawler - Create Your Opening Crawl",
-  description: "Create and share your own cinematic opening crawl animation. Free, open-source, and privacy-focused.",
-  keywords: ["opening crawl", "animation", "crawl generator", "crawl creator", "cinematic crawl"],
-  metadataBase: new URL(baseUrl),
-  openGraph: {
-    title: "Star Crawler - Create Your Opening Crawl",
-    description: "Create and share your own cinematic opening crawl animation. Free, open-source, and privacy-focused.",
-    url: baseUrl,
-    siteName: "Star Crawler",
-    type: "website",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Star Crawler - Create Your Opening Crawl",
-    description: "Create and share your own cinematic opening crawl animation.",
-  },
+  ...baseMetadata,
+  metadataBase: new URL(siteConfig.url),
+  keywords: [
+    "opening crawl",
+    "animation",
+    "crawl generator",
+    "crawl creator",
+    "cinematic crawl",
+  ],
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",

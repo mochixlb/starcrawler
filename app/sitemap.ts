@@ -1,34 +1,33 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://starcrawler.vercel.app";
-  const currentDate = new Date().toISOString();
+  const currentDate = new Date();
 
   return [
     {
-      url: baseUrl,
+      url: siteConfig.url,
       lastModified: currentDate,
       changeFrequency: "monthly",
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/privacy`,
+      url: `${siteConfig.url}/privacy`,
       lastModified: currentDate,
       changeFrequency: "yearly",
       priority: 0.5,
     },
     {
-      url: `${baseUrl}/terms`,
+      url: `${siteConfig.url}/terms`,
       lastModified: currentDate,
       changeFrequency: "yearly",
       priority: 0.5,
     },
     {
-      url: `${baseUrl}/disclaimer`,
+      url: `${siteConfig.url}/disclaimer`,
       lastModified: currentDate,
       changeFrequency: "yearly",
       priority: 0.5,
     },
   ];
 }
-
