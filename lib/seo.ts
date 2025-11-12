@@ -47,8 +47,7 @@ const FALLBACK_URL = "https://starcrawler.vercel.app";
 export const siteConfig = {
   name: "Star Crawler",
   url: validatedSiteUrl || FALLBACK_URL,
-  description:
-    "Create and share your own cinematic opening crawl animation. Free, open-source, and privacy-focused.",
+  description: "Create and share your own cinematic opening crawl",
 } as const;
 
 /**

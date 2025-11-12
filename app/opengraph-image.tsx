@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/seo";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 export const alt = siteConfig.name;
 export const size = {
@@ -13,6 +15,11 @@ export default async function Image() {
   const crawlYellow = "#E5B13A";
   const crawlBlack = "#000000";
   const gray300 = "#d1d5db";
+
+  // Load Star Jedi font
+  const fontData = await readFile(
+    join(process.cwd(), "public/fonts/Starjedi.ttf")
+  );
 
   return new ImageResponse(
     (
@@ -143,12 +150,11 @@ export default async function Image() {
           <div
             style={{
               fontSize: "72px",
-              fontWeight: "900",
+              fontWeight: "normal",
               marginBottom: "32px",
               color: crawlYellow,
               letterSpacing: "0.15em",
-              fontFamily:
-                '"Arial Black", Impact, "Franklin Gothic Heavy", sans-serif',
+              fontFamily: "Star Jedi",
               textTransform: "uppercase",
               textShadow: `0 0 20px ${crawlYellow}40`,
             }}
@@ -165,6 +171,7 @@ export default async function Image() {
               letterSpacing: "0.05em",
               lineHeight: "1.5",
               maxWidth: "800px",
+              fontFamily: "Arial",
             }}
           >
             {siteConfig.description}
@@ -174,6 +181,14 @@ export default async function Image() {
     ),
     {
       ...size,
+      fonts: [
+        {
+          name: "Star Jedi",
+          data: fontData,
+          style: "normal",
+          weight: 400,
+        },
+      ],
     }
   );
 }
