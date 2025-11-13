@@ -93,11 +93,11 @@ export default function Error({ error, reset }: ErrorProps) {
             className="font-opening-text text-xs text-gray-400 sm:text-sm"
             style={{ letterSpacing: "0.05em" }}
           >
-            If this problem persists, please refresh the page or try again later.
+            If this problem persists, please refresh the page or try again
+            later.
           </p>
         </div>
       </div>
     </main>
   );
 }
-
