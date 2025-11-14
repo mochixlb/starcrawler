@@ -26,6 +26,13 @@ export function CrawlDisplay({
 }: CrawlDisplayProps) {
   const controls = useAnimation();
   const [phase, setPhase] = useState<AnimationPhase>("opening-text");
+  const hasCompletedRef = useRef(false);
+  const markComplete = () => {
+    if (hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+    setIsComplete(true);
+    onComplete?.();
+  };
 
   // Notify parent of phase changes
   useEffect(() => {
@@ -38,7 +45,6 @@ export function CrawlDisplay({
   const startTimeRef = useRef<number | null>(null);
   const totalPausedTimeRef = useRef(0);
   const pauseStartTimeRef = useRef<number | null>(null);
-  const [crawlOpacity, setCrawlOpacity] = useState(1);
   const controlsShownOnceRef = useRef(false);
 
   // Check for reduced motion preference
@@ -103,7 +109,7 @@ export function CrawlDisplay({
             : 1;
 
         // Resume from current position
-        controls.set({ y: `${currentY}%`, opacity: crawlOpacity });
+        controls.set({ y: `${currentY}%`, opacity: targetOpacity });
         controls
           .start({
             y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
@@ -112,13 +118,6 @@ export function CrawlDisplay({
               duration: remainingDuration,
               ease: "linear",
             },
-          })
-          .then(() => {
-            // Animation completed - mark as complete
-            if (phase === "crawl" && !isComplete) {
-              setIsComplete(true);
-              onComplete?.();
-            }
           });
       }
     }
@@ -129,9 +128,7 @@ export function CrawlDisplay({
     controls,
     crawlDuration,
     baseCrawlDuration,
-    crawlOpacity,
-    isComplete,
-    onComplete,
+    markComplete,
   ]);
 
   // Calculate total duration (opening + logo + crawl)
@@ -151,6 +148,7 @@ export function CrawlDisplay({
       overallStartTimeRef.current = null;
       overallPausedTimeRef.current = 0;
       overallPauseStartRef.current = null;
+      hasCompletedRef.current = false;
     }
   }, [isPlaying]);
 
@@ -211,17 +209,13 @@ export function CrawlDisplay({
                 (currentProgressRef.current - fadeStart) /
                 (fadeEnd - fadeStart);
               const opacity = Math.max(0, 1 - fadeProgress);
-              setCrawlOpacity(opacity);
+              controls.set({ opacity });
             } else {
-              setCrawlOpacity(1);
+              controls.set({ opacity: 1 });
             }
 
             // If crawl animation has completed, mark as complete
-            if (crawlElapsed >= baseCrawlDuration && !isComplete) {
-              setIsComplete(true);
-              onComplete?.();
-              return;
-            }
+            // Completion is handled by the crawl-phase effect to avoid duplicates
           }
 
           onProgressChange(overallProgress, overallElapsed, overallRemaining);
@@ -239,7 +233,7 @@ export function CrawlDisplay({
     totalDuration,
     onProgressChange,
     isComplete,
-    onComplete,
+    markComplete,
   ]);
 
   // Track phase transition start times for pause/resume
@@ -253,6 +247,7 @@ export function CrawlDisplay({
       setPhase("opening-text");
       setIsComplete(false);
       setCrawlStarted(false);
+      hasCompletedRef.current = false;
       animationStartedRef.current = false;
       currentProgressRef.current = 0;
       startTimeRef.current = null;
@@ -357,13 +352,11 @@ export function CrawlDisplay({
       const crawlRemaining = Math.max(0, baseCrawlDuration - crawlElapsed);
 
       if (crawlRemaining <= 0) {
-        setIsComplete(true);
-        onComplete?.();
+        markComplete();
         return;
       }
       const timer = setTimeout(() => {
-        setIsComplete(true);
-        onComplete?.();
+        markComplete();
       }, crawlRemaining * 1000);
       return () => clearTimeout(timer);
     }
@@ -376,7 +369,7 @@ export function CrawlDisplay({
     openingTextDuration,
     logoDuration,
     crawlDuration,
-    onComplete,
+    markComplete,
     crawlStarted,
     baseCrawlDuration,
     startTimeRef,
@@ -393,6 +386,7 @@ export function CrawlDisplay({
         // Restart from opening text phase
         setPhase("opening-text");
         setIsComplete(false);
+        hasCompletedRef.current = false;
         setCrawlStarted(false);
         animationStartedRef.current = false;
         currentProgressRef.current = 0;
@@ -415,6 +409,7 @@ export function CrawlDisplay({
         const openingSeekProgress = seekTime / openingTextDuration;
         setPhase("opening-text");
         setIsComplete(false);
+        hasCompletedRef.current = false;
         setCrawlStarted(false);
         animationStartedRef.current = false;
         currentProgressRef.current = 0;
@@ -440,6 +435,7 @@ export function CrawlDisplay({
         const logoSeekProgress = logoSeekTime / logoDuration;
         setPhase("logo");
         setIsComplete(false);
+        hasCompletedRef.current = false;
         setCrawlStarted(false);
         animationStartedRef.current = false;
         currentProgressRef.current = 0;
@@ -470,6 +466,7 @@ export function CrawlDisplay({
 
         setPhase("crawl");
         setCrawlStarted(true);
+        hasCompletedRef.current = false;
         animationStartedRef.current = true;
 
         const startY = parseFloat(CRAWL_CONSTANTS.CRAWL_START_POSITION);
@@ -490,38 +487,35 @@ export function CrawlDisplay({
         overallPausedTimeRef.current = 0;
         overallPauseStartRef.current = null;
 
-        controls.set({ y: `${targetY}%` });
-
         // Update opacity based on seek progress
         const fadeStart = 0.7;
         const fadeEnd = 1.0;
+        let targetOpacity = 1;
         if (crawlSeekProgress >= fadeStart) {
           const fadeProgress =
             (crawlSeekProgress - fadeStart) / (fadeEnd - fadeStart);
-          const opacity = Math.max(0, 1 - fadeProgress);
-          setCrawlOpacity(opacity);
+          targetOpacity = Math.max(0, 1 - fadeProgress);
         } else {
-          setCrawlOpacity(1);
+          targetOpacity = 1;
         }
+
+        controls.set({ y: `${targetY}%`, opacity: targetOpacity });
 
         const remainingDuration = crawlDuration * (1 - crawlSeekProgress);
         if (!isPaused) {
-          controls
-            .start({
+          if (remainingDuration <= 0) {
+            // Edge-case: already at the end after seek
+            markComplete();
+          } else {
+            controls.start({
               y: CRAWL_CONSTANTS.CRAWL_END_POSITION,
-              opacity: crawlSeekProgress >= fadeStart ? crawlOpacity : 1,
+              opacity: targetOpacity,
               transition: {
                 duration: remainingDuration,
                 ease: "linear",
               },
-            })
-            .then(() => {
-              // Animation completed - mark as complete
-              if (phase === "crawl" && !isComplete) {
-                setIsComplete(true);
-                onComplete?.();
-              }
             });
+          }
         }
       }
     }
@@ -537,6 +531,7 @@ export function CrawlDisplay({
     openingTextDuration,
     logoDuration,
     totalDuration,
+    markComplete,
   ]);
 
   // Start crawl animation early (during logo phase) or when phase becomes "crawl"
@@ -552,7 +547,6 @@ export function CrawlDisplay({
       startTimeRef.current = Date.now();
       totalPausedTimeRef.current = 0;
       pauseStartTimeRef.current = null;
-      setCrawlOpacity(1); // Reset opacity when starting
       // Reset to starting position (off-screen at bottom)
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 });
       // Start animation immediately with completion callback
@@ -564,13 +558,6 @@ export function CrawlDisplay({
             duration: crawlDuration,
             ease: "linear",
           },
-        })
-        .then(() => {
-          // Animation completed - mark as complete
-          if (phase === "crawl" && !isComplete) {
-            setIsComplete(true);
-            onComplete?.();
-          }
         });
     }
   }, [
@@ -580,8 +567,7 @@ export function CrawlDisplay({
     isPaused,
     controls,
     crawlDuration,
-    isComplete,
-    onComplete,
+    markComplete,
   ]);
 
   // Reset when crawlData changes
@@ -599,13 +585,13 @@ export function CrawlDisplay({
     if (crawlDataChanged) {
       setPhase("opening-text");
       setIsComplete(false);
+      hasCompletedRef.current = false;
       setCrawlStarted(false);
       animationStartedRef.current = false;
       currentProgressRef.current = 0;
       startTimeRef.current = null;
       totalPausedTimeRef.current = 0;
       pauseStartTimeRef.current = null;
-      setCrawlOpacity(1); // Reset opacity
       controls.set({ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 });
       previousCrawlDataRef.current = crawlData;
     }
@@ -833,10 +819,7 @@ export function CrawlDisplay({
         >
           <motion.div
             className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
-            animate={{
-              ...controls,
-              opacity: crawlOpacity,
-            }}
+            animate={controls}
             initial={{ y: CRAWL_CONSTANTS.CRAWL_START_POSITION, opacity: 1 }}
             style={{
               willChange: "transform, opacity",

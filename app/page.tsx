@@ -24,6 +24,7 @@ import {
   getBaseUrl,
   isUrlLengthSafe,
 } from "@/lib/utils";
+import { computeSeekProgress } from "@/lib/utils";
 import { UI_CONSTANTS } from "@/lib/constants";
 
 function HomeContent() {
@@ -204,20 +205,18 @@ function HomeContent() {
         case "ArrowLeft":
           e.preventDefault();
           // Seek backward 5 seconds
-          const backwardProgress = Math.max(
-            0,
-            progress - 5 / (elapsed + remaining)
-          );
-          handleSeek(backwardProgress);
+          {
+            const backward = computeSeekProgress(progress, elapsed, remaining, -5);
+            if (backward !== progress) handleSeek(backward);
+          }
           break;
         case "ArrowRight":
           e.preventDefault();
           // Seek forward 5 seconds
-          const forwardProgress = Math.min(
-            1,
-            progress + 5 / (elapsed + remaining)
-          );
-          handleSeek(forwardProgress);
+          {
+            const forward = computeSeekProgress(progress, elapsed, remaining, 5);
+            if (forward !== progress) handleSeek(forward);
+          }
           break;
         case "f":
         case "F":

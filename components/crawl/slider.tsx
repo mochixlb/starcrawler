@@ -40,7 +40,6 @@ export function Slider({
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isActive, setIsActive] = useState(false);
   const [localValue, setLocalValue] = useState<number | null>(null);
   const localValueRef = useRef<number | null>(null);
 
@@ -58,6 +57,10 @@ export function Slider({
       }
 
       const rect = trackRef.current.getBoundingClientRect();
+      // Guard against zero or negative width (layout edge case)
+      if (!rect.width || rect.width <= 0) {
+        return localValueRef.current !== null ? localValueRef.current : value;
+      }
       const x = clientX - rect.left;
       const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
       const rawValue = min + (percentage / 100) * (max - min);
@@ -79,7 +82,6 @@ export function Slider({
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
-      setIsActive(true);
       // Initialize local value for visual feedback during drag
       localValueRef.current = value;
       setLocalValue(value);
@@ -140,7 +142,6 @@ export function Slider({
       }
 
       setIsDragging(false);
-      setIsActive(false);
       // Clear local value after a brief delay to sync with prop value
       setTimeout(() => {
         localValueRef.current = null;

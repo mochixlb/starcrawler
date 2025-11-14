@@ -136,11 +136,9 @@ export function CrawlControls({
   const [internalVisible, setInternalVisible] = useState(false);
   const [showCenterButton, setShowCenterButton] = useState(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingSeekRef = useRef<number | null>(null);
   const wasPausedBeforeDragRef = useRef<boolean | null>(null);
   const isDraggingRef = useRef(false);
   const onChangeCallCountRef = useRef(0);
-  const commitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use external visibility if provided, otherwise use internal state
   const isVisible =
@@ -237,12 +235,6 @@ export function CrawlControls({
     // Increment call count to detect if this is a drag (multiple calls) vs click (single call)
     onChangeCallCountRef.current += 1;
 
-    // Clear any pending commit timeout (if commit happens soon, it's a click, not drag)
-    if (commitTimeoutRef.current) {
-      clearTimeout(commitTimeoutRef.current);
-      commitTimeoutRef.current = null;
-    }
-
     // Pause animation during drag (thumb drag) if this is the second+ onChange call
     // Track clicks only call onChange once, then immediately onCommit, so we skip pause
     if (!isDraggingRef.current && onChangeCallCountRef.current > 1) {
@@ -256,7 +248,6 @@ export function CrawlControls({
 
     // Seek in real-time during drag for live preview
     onSeek(newProgress);
-    pendingSeekRef.current = newProgress;
   };
 
   // Handle slider commit (when drag ends or track is clicked)
@@ -275,13 +266,6 @@ export function CrawlControls({
 
     // Reset call count for next interaction
     onChangeCallCountRef.current = 0;
-    pendingSeekRef.current = null;
-
-    // Clear commit timeout
-    if (commitTimeoutRef.current) {
-      clearTimeout(commitTimeoutRef.current);
-      commitTimeoutRef.current = null;
-    }
 
     // Set timeout to hide after 3 seconds
     if (hideTimeoutRef.current) {

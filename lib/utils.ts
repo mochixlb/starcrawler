@@ -144,3 +144,23 @@ export function buildCrawlText(crawlData: CrawlData): string {
 
   return textParts.join("\n\n");
 }
+
+/**
+ * Computes the next seek progress based on a time delta and the known total duration.
+ * - Returns current progress if total duration is not available (<= 0)
+ * - Clamps result to [0, 1]
+ */
+export function computeSeekProgress(
+  currentProgress: number,
+  elapsedSeconds: number,
+  remainingSeconds: number,
+  deltaSeconds: number
+): number {
+  const total = elapsedSeconds + remainingSeconds;
+  if (!(total > 0) || !Number.isFinite(total)) {
+    return currentProgress;
+  }
+  const deltaProgress = deltaSeconds / total;
+  const next = currentProgress + deltaProgress;
+  return Math.max(0, Math.min(1, next));
+}
