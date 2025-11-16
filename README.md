@@ -15,9 +15,11 @@
 
 ---
 
-## Screenshot
+## Screenshots
 
 ![Star Crawler Screenshot](public/screenshot_01.png)
+
+![Star Crawler Screenshot](public/screenshot_02.png)
 
 ---
 

@@ -1,0 +1,33 @@
+<svg width="280" height="48" viewBox="0 0 280 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background -->
+  <rect width="280" height="48" fill="white" rx="4"/>
+  
+  <!-- Logo group (icon + text, centered in rectangle) -->
+  <g transform="translate(47, 8)">
+    <!-- Logo icon (star constellation, 24x24) -->
+    <g transform="translate(0, 0)">
+      <!-- Central star -->
+      <circle cx="12" cy="12" r="1.875" fill="#1e293b"/>
+      
+      <!-- Four surrounding stars forming a constellation -->
+      <circle cx="12" cy="6" r="1.125" fill="#1e293b"/>
+      <circle cx="18" cy="12" r="1.125" fill="#1e293b"/>
+      <circle cx="12" cy="18" r="1.125" fill="#1e293b"/>
+      <circle cx="6" cy="12" r="1.125" fill="#1e293b"/>
+    </g>
+    
+    <!-- Text: Star Crawler (24px font, medium weight, tight tracking) -->
+    <text
+      x="36"
+      y="20"
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Geist Sans', Roboto, 'Helvetica Neue', Arial, sans-serif"
+      font-size="24"
+      font-weight="500"
+      fill="#1e293b"
+      letter-spacing="-0.02em"
+    >
+      Star Crawler
+    </text>
+  </g>
+</svg>
+
