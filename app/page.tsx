@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { RotateCcw, Share2, Check } from "lucide-react";
+import { motion } from "framer-motion";
 import { Starfield } from "@/components/crawl/starfield";
 import { CrawlInput } from "@/components/crawl/crawl-input";
 import { CrawlDisplay } from "@/components/crawl/crawl-display";
@@ -297,18 +298,45 @@ function HomeContent() {
         {!crawlData || !isPlaying ? (
           <div className="w-full max-w-2xl space-y-4">
             <div className="text-center">
-              <h1
+              <motion.h1
                 className="mb-3 font-logo text-3xl font-bold uppercase tracking-wider text-crawl-yellow sm:text-4xl md:text-5xl"
                 style={{ letterSpacing: "0.15em" }}
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  textShadow: [
+                    "0 0 10px rgba(229, 177, 58, 0.3)",
+                    "0 0 20px rgba(229, 177, 58, 0.5)",
+                    "0 0 10px rgba(229, 177, 58, 0.3)",
+                  ],
+                }}
+                transition={{
+                  opacity: { duration: 0.8, ease: "easeOut" },
+                  y: { duration: 0.8, ease: "easeOut" },
+                  scale: { duration: 0.8, ease: "easeOut" },
+                  textShadow: {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                }}
               >
                 STAR CRAWLER
-              </h1>
-              <p
+              </motion.h1>
+              <motion.p
                 className="font-opening-text text-sm text-gray-300 sm:text-base"
                 style={{ letterSpacing: "0.05em" }}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  opacity: { duration: 0.6, delay: 0.3, ease: "easeOut" },
+                  y: { duration: 0.6, delay: 0.3, ease: "easeOut" },
+                }}
               >
                 Create and share your own opening crawl
-              </p>
+              </motion.p>
             </div>
 
             <CrawlInput
