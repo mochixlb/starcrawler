@@ -769,20 +769,24 @@ export function CrawlDisplay({
         </motion.div>
       )}
 
-      {/* Logo Animation - 3D shrink/recede */}
+      {/* Logo Animation - appears instantly, shrinks and recedes into distance */}
       {phase === "logo" && (
         <motion.div
           className="absolute inset-0 z-20 flex items-center justify-center"
-          initial={{ scale: 3.5, opacity: 0, y: 0 }}
+          initial={{ scale: 3.5, opacity: 1, y: 0 }}
           animate={{
-            scale: [3.5, 3, 0.1],
-            opacity: [0, 1, 0],
-            y: [0, 0, -150],
+            scale: 0.1,
+            y: -150,
+            opacity: 0,
           }}
           transition={{
             duration: logoDuration,
-            ease: [0.25, 0.1, 0.25, 1], // Custom ease-out curve for smooth deceleration
-            times: [0, 0.2, 1], // Smooth continuous motion
+            ease: [0.25, 0.1, 0.25, 1],
+            opacity: {
+              duration: logoDuration * 0.5,
+              delay: logoDuration * 0.5,
+              ease: "easeIn",
+            },
           }}
           style={{
             transformStyle: "preserve-3d",
